@@ -129,19 +129,48 @@ body {
 
 /* ── right content area ── */
 .card-right {
-  margin-left: 88px;
+  margin-left: 86px;
   flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  padding: 12px 14px 12px 0;
+  justify-content: space-between;
+  padding: 10px 12px 10px 6px;
   z-index: 2;
 }
 
-/* name / title */
+/* ── person block (top) ── */
+.card-person-block {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.card-person {
+  font-family: var(--font-h);
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--teal-dk);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  line-height: 1.2;
+}
+.card-person-phone {
+  font-family: var(--font-b);
+  font-size: 8.5px;
+  font-weight: 600;
+  color: var(--teal);
+  letter-spacing: .03em;
+}
+.card-divider {
+  width: 100%;
+  height: 1px;
+  background: #dde4ea;
+  margin: 4px 0;
+}
+
+/* ── company block (middle) ── */
 .card-name {
   font-family: var(--font-h);
-  font-size: 13.5px;
+  font-size: 13px;
   font-weight: 900;
   color: var(--teal-dk);
   letter-spacing: .04em;
@@ -150,67 +179,41 @@ body {
 }
 .card-title {
   font-family: var(--font-h);
-  font-size: 7px;
+  font-size: 6.5px;
   font-weight: 700;
   color: var(--teal);
-  letter-spacing: .18em;
+  letter-spacing: .16em;
   text-transform: uppercase;
-  margin-top: 3px;
-  margin-bottom: 2px;
+  margin-top: 2px;
 }
 .card-rule {
-  width: 80px;
-  height: 2.5px;
+  width: 72px;
+  height: 2px;
   background: var(--accent);
   border-radius: 2px;
-  margin: 5px 0 8px;
+  margin: 4px 0;
 }
 
-/* contact lines */
+/* ── contact lines (bottom) ── */
 .card-contacts {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
 }
 .cline {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
   font-family: var(--font-b);
-  font-size: 7.5px;
+  font-size: 7px;
   font-weight: 500;
   color: var(--text);
   line-height: 1;
 }
 .cline svg {
-  width: 8px; height: 8px;
+  width: 7px; height: 7px;
   fill: var(--teal-dk);
   flex-shrink: 0;
-}
-
-/* ── person name on card ── */
-.card-person-block {
-  position: absolute;
-  top: 10px;
-  left: 92px;
-  right: 10px;
-  z-index: 5;
-}
-.card-person {
-  font-family: var(--font-h);
-  font-size: 12px;
-  font-weight: 800;
-  color: var(--teal-dk);
-  letter-spacing: .1em;
-  text-transform: uppercase;
-  margin-bottom: 1px;
-}
-.card-person-phone {
-  font-family: var(--font-b);
-  font-size: 10px;
-  font-weight: 600;
-  color: var(--teal);
-  letter-spacing: .04em;
 }
 
 /* ── input panel ── */
@@ -380,17 +383,24 @@ body {
            style="position:absolute;top:50%;left:50%;transform:translate(-56%,-50%);width:52px;height:52px;object-fit:contain;z-index:3;">
     </div>
 
-    <!-- Name/contact pinned to top of card -->
-    <div class="card-person-block">
-      <div class="card-person" id="display-name"></div>
-      <div class="card-person-phone" id="display-phone"></div>
-    </div>
-
     <!-- Right content -->
     <div class="card-right">
-      <div class="card-name">Beyond<br>Wound Care</div>
-      <div class="card-title">Internal Medicine &amp; Wound Care</div>
-      <div class="card-rule"></div>
+
+      <!-- TOP: person name / contact -->
+      <div class="card-person-block" id="person-top">
+        <div class="card-person" id="display-name"></div>
+        <div class="card-person-phone" id="display-phone"></div>
+        <div class="card-divider" id="person-divider" style="display:none;"></div>
+      </div>
+
+      <!-- MIDDLE: company -->
+      <div>
+        <div class="card-name">Beyond<br>Wound Care</div>
+        <div class="card-title">Internal Medicine &amp; Wound Care</div>
+        <div class="card-rule"></div>
+      </div>
+
+      <!-- BOTTOM: contacts -->
       <div class="card-contacts">
         <div class="cline">
           <svg viewBox="0 0 24 24"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1-9.4 0-17-7.6-17-17 0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z"/></svg>
@@ -409,6 +419,7 @@ body {
           1340 Remington Rd. Ste P, Schaumburg, IL 60173
         </div>
       </div>
+
     </div>
 
     <div class="card-web">www.beyondwoundcare.com</div>
@@ -464,10 +475,12 @@ function updateCard() {
   const phone = document.getElementById('input-phone').value.trim();
   const nameEl = document.getElementById('display-name');
   const phoneEl = document.getElementById('display-phone');
+  const divider = document.getElementById('person-divider');
   nameEl.textContent = name;
   nameEl.style.display = name ? 'block' : 'none';
   phoneEl.textContent = phone ? 'Contact: ' + phone : '';
   phoneEl.style.display = phone ? 'block' : 'none';
+  if (divider) divider.style.display = (name || phone) ? 'block' : 'none';
 }
 updateCard(); // init hidden
 </script>
