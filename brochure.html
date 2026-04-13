@@ -1,0 +1,2247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Beyond Wound Care – Brochure Editor</title>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Montserrat:ital,wght@0,700;0,800;0,900;1,600&display=swap" rel="stylesheet">
+<style>
+/* ════════════════════ BASE ════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+:root {
+  --teal:    #1a6fa3;
+  --teal-dk: #0d5080;
+  --teal-lt: #e8f3fc;
+  --accent:  #f4a01c;
+  --accent-dk:#d4880e;
+  --white:   #ffffff;
+  --text:    #1e2a35;
+  --muted:   #60717e;
+  --ui-bg:   #1e1e2e;
+  --ui-fg:   #cdd6f4;
+  --ui-border:#313244;
+  --ui-hover: #313244;
+  --ui-accent:#89b4fa;
+  --font-body: 'Inter', 'Segoe UI', Arial, sans-serif;
+  --font-head: 'Montserrat', 'Segoe UI', Arial, sans-serif;
+  --shadow-sm: 0 2px 10px rgba(13,80,128,.13);
+  --shadow-md: 0 5px 20px rgba(13,80,128,.22);
+  --radius:  9px;
+}
+body {
+  font-family: var(--font-body);
+  background: #b0bac8;
+  color: var(--text);
+  font-size: 9pt;
+  line-height: 1.5;
+  padding-top: 56px;
+  -webkit-font-smoothing: antialiased;
+}
+body.print-mode { padding-top: 0; background: none; }
+
+/* ════════════════════ TOP BAR ════════════════════ */
+#topbar {
+  position: fixed; top: 0; left: 0; right: 0;
+  height: 56px;
+  background: var(--ui-bg);
+  border-bottom: 1px solid var(--ui-border);
+  display: flex; align-items: center;
+  padding: 0 16px; gap: 8px;
+  z-index: 9000; flex-wrap: wrap;
+}
+#topbar .brand { color: var(--ui-accent); font-weight:700; font-size:12pt; margin-right:12px; white-space:nowrap; }
+#topbar .brand span { color: var(--accent); }
+.tb-sep { width:1px; height:28px; background:var(--ui-border); margin:0 6px; }
+.tb-btn {
+  background: var(--ui-hover); border: 1px solid var(--ui-border);
+  color: var(--ui-fg); border-radius:5px; padding:5px 12px;
+  cursor:pointer; font-size:8.5pt;
+  display:flex; align-items:center; gap:5px;
+  white-space:nowrap; transition:background .15s; font-family:inherit;
+}
+.tb-btn:hover { background:#45475a; }
+.tb-btn.active { background:var(--ui-accent); color:#1e1e2e; font-weight:700; border-color:var(--ui-accent); }
+.tb-btn.success { background:#1e3a2f; color:#a6e3a1; border-color:#2e5a3f; }
+.tb-btn.success:hover { background:#2e5a3f; }
+#page-indicator { color:var(--ui-fg); font-size:8pt; margin-left:auto; padding-right:4px; }
+
+/* ════════════════════ FLOATING BLOCK TOOLBAR ════════════════════ */
+#block-toolbar {
+  position:fixed;
+  background:var(--ui-bg);
+  border:1px solid var(--ui-border);
+  border-radius:7px;
+  padding:5px 8px;
+  display:none; align-items:center; gap:4px;
+  z-index:9500;
+  box-shadow:0 4px 20px rgba(0,0,0,.45);
+  flex-wrap:wrap;
+}
+#block-toolbar.visible { display:flex; }
+.bt-btn {
+  background:transparent; border:1px solid transparent;
+  color:var(--ui-fg); border-radius:4px; padding:4px 7px;
+  cursor:pointer; font-size:8.5pt; line-height:1;
+  display:flex; align-items:center; gap:3px;
+  font-family:inherit; transition:background .12s;
+}
+.bt-btn:hover { background:var(--ui-hover); border-color:var(--ui-border); }
+.bt-sep { width:1px; height:20px; background:var(--ui-border); }
+.bt-label { color:#6c7086; font-size:7.5pt; padding:0 2px; }
+.bt-close { color:#6c7086; font-size:10pt; padding:2px 6px; }
+.bt-close:hover { color:#cdd6f4; background:var(--ui-hover); }
+.bt-color-wrap { position:relative; display:flex; align-items:center; gap:3px; }
+.bt-color-wrap input[type=color] {
+  width:24px; height:24px; border:1px solid #45475a;
+  border-radius:4px; cursor:pointer; padding:1px; background:#313244;
+}
+
+/* ════════════════════ RIGHT SIDEBAR ════════════════════ */
+#sidebar {
+  position:fixed; top:56px; right:0;
+  width:230px; height:calc(100vh - 56px);
+  background:var(--ui-bg); border-left:1px solid var(--ui-border);
+  overflow-y:auto; z-index:8000; padding:14px;
+  transform:translateX(100%); transition:transform .25s ease;
+}
+#sidebar.open { transform:translateX(0); }
+body.sidebar-open { padding-right:230px; }
+.sb-section { margin-bottom:18px; }
+.sb-title {
+  color:var(--ui-accent); font-size:8pt; font-weight:700;
+  text-transform:uppercase; letter-spacing:.06em;
+  margin-bottom:8px; padding-bottom:4px;
+  border-bottom:1px solid var(--ui-border);
+}
+.sb-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+.sb-row label { color:var(--ui-fg); font-size:8pt; }
+.sb-row input[type=color] {
+  width:36px; height:24px; border:1px solid #45475a;
+  border-radius:3px; cursor:pointer; padding:1px; background:#313244;
+}
+.sb-row input[type=range] { width:100px; accent-color:var(--ui-accent); }
+.sb-row select {
+  background:#313244; color:var(--ui-fg);
+  border:1px solid var(--ui-border); border-radius:4px;
+  padding:3px 6px; font-size:8pt; font-family:inherit; width:130px;
+}
+.sb-panel-btn {
+  display:flex; width:100%; text-align:left;
+  background:#313244; color:var(--ui-fg);
+  border:1px solid var(--ui-border); border-radius:4px;
+  padding:5px 8px; font-size:8pt; margin-bottom:4px;
+  cursor:pointer; font-family:inherit;
+  align-items:center; gap:7px;
+}
+.sb-panel-btn:hover { background:#45475a; }
+.sb-swatch { width:14px; height:14px; border-radius:3px; display:inline-block; border:1px solid rgba(255,255,255,.2); flex-shrink:0; }
+.sb-hint { font-size:7.5pt; color:#6c7086; margin-top:4px; line-height:1.4; }
+.sb-btn {
+  width:100%; background:#313244; color:var(--ui-fg);
+  border:1px solid var(--ui-border); border-radius:5px;
+  padding:7px; font-size:8pt; cursor:pointer;
+  font-family:inherit; margin-bottom:5px; transition:background .12s;
+}
+.sb-btn:hover { background:#45475a; }
+
+/* ════════════════════ ADD BLOCK MENU ════════════════════ */
+#add-block-menu {
+  position:fixed; background:var(--ui-bg);
+  border:1px solid var(--ui-border); border-radius:7px;
+  padding:6px; z-index:9600; display:none;
+  box-shadow:0 6px 24px rgba(0,0,0,.5); min-width:180px;
+}
+#add-block-menu.open { display:block; }
+.abm-item {
+  padding:6px 10px; border-radius:4px;
+  color:var(--ui-fg); font-size:8.5pt;
+  cursor:pointer; display:flex; align-items:center; gap:8px;
+}
+.abm-item:hover { background:var(--ui-hover); }
+
+/* ════════════════════ BROCHURE PAGES ════════════════════ */
+.page {
+  width:11in; height:8.5in;
+  background:#fff; display:flex; flex-direction:row;
+  margin:0.4in auto;
+  box-shadow:0 6px 32px rgba(0,0,0,.3);
+  position:relative;
+}
+.page-label {
+  position:absolute; top:-22px; left:0;
+  font-size:8pt; color:#555; font-weight:600;
+  padding:2px 8px; background:#e8e8e8;
+  border-radius:4px 4px 0 0; letter-spacing:.04em;
+}
+.panel {
+  width:calc(11in / 3); height:8.5in;
+  overflow:hidden; border-right:1px dashed #ccc;
+  position:relative; flex-shrink:0;
+}
+.panel:last-child { border-right:none; }
+.panel-inner {
+  width:100%; height:100%;
+  padding:0.38in 0.32in;
+  overflow:hidden;
+  display:flex; flex-direction:column;
+}
+/* Page 2 panels need a bit more vertical room */
+#panel-p2l .panel-inner {
+  padding-top:0.13in;
+  padding-bottom:0.13in;
+}
+#panel-p2m .panel-inner,
+#panel-p2r .panel-inner {
+  padding-top:0.22in;
+  padding-bottom:0.22in;
+}
+/* Tighter cards when showing both wound + IM sections */
+#panel-p2l .wound-card { margin-bottom:3px; padding:4px 8px 4px 7px; gap:6px; }
+#panel-p2l .wc-icon { width:26px; height:26px; }
+#panel-p2l .wc-icon svg { width:16px; height:16px; }
+#panel-p2l .wound-card .wc-name { font-size:7.5pt; }
+#panel-p2l .wound-card .wc-desc { font-size:6.5pt; line-height:1.35; }
+/* Tighter step cards to accommodate photos on back cover */
+#panel-p1l .step-card-dk { padding:7px 10px; margin-bottom:6px; gap:8px; }
+#panel-p1l .step-card-dk strong { font-size:8pt; }
+#panel-p1l .step-card-dk span { font-size:7.5pt; }
+#panel-p1l .ins-list { margin-bottom:8px !important; }
+#panel-p1l h2[contenteditable] { margin-bottom:8px !important; }
+/* ── p1l (back cover) fit ── */
+#panel-p1l .ins-list { margin-bottom:8px !important; }
+#panel-p1l h2[contenteditable] { margin-bottom:7px !important; }
+#panel-p1l [data-block="ins-photo-top"] img { height:60px !important; }
+#panel-p1l [data-block="ins-photo-top"] > div { margin-bottom:7px !important; }
+#panel-p1l [data-block="ins-photo-mid"] img { height:50px !important; }
+#panel-p1l [data-block="ins-photo-mid"] > div { margin-bottom:7px !important; }
+#panel-p1l [data-block="ins-avail"] { margin-top:4px !important; }
+/* ── p1m (our team) fit ── */
+#panel-p1m .panel-inner { padding-top:0.22in !important; padding-bottom:0.22in !important; }
+#panel-p1m [data-block="team-hd"] h2 { margin-bottom:7px !important; }
+#panel-p1m [data-block="team-hd"] .eyebrow { margin-bottom:4px !important; }
+#panel-p1m [data-block="team-photo"] img { height:80px !important; }
+#panel-p1m [data-block="team-photo"] > div { margin-bottom:9px !important; }
+#panel-p1m [data-block="team-intro"] .mission-box { margin-bottom:9px !important; font-size:7.5pt !important; line-height:1.5 !important; padding:8px 12px !important; }
+#panel-p1m .team-card { padding:7px 11px !important; margin-bottom:7px !important; }
+#panel-p1m .tc-name { font-size:8.5pt !important; }
+#panel-p1m .tc-role { font-size:7pt !important; line-height:1.4 !important; }
+#panel-p1m .tc-avatar { width:28px !important; height:28px !important; font-size:7.5pt !important; }
+#panel-p1m [data-block="team-healing"] .section-title { margin-top:9px !important; margin-bottom:6px !important; }
+#panel-p1m .heal-row { margin-bottom:5px !important; }
+#panel-p1m .heal-dot { width:20px !important; height:20px !important; font-size:7pt !important; }
+#panel-p1m .heal-label { font-size:7pt !important; min-width:40px !important; }
+#panel-p1m .heal-bar-desc { font-size:6.5pt !important; }
+#panel-p1m [data-block="team-provider-space"] { margin-top:9px !important; }
+#panel-p1m [data-block="team-provider-space"] > div { padding:8px 12px !important; }
+/* ── p1r (front cover) fit ── */
+#panel-p1r [data-block="fc-logo"] img { width:150px !important; height:150px !important; }
+#panel-p1r [data-block="fc-tagline"] { margin-bottom:0.09in !important; }
+#panel-p1r [data-block="fc-tagline"] > div { padding:6px 11px !important; }
+#panel-p1r [data-block="fc-photo"] img { height:76px !important; }
+#panel-p1r [data-block="fc-services"] > div { padding:6px 9px !important; }
+#panel-p1r [data-block="fc-services"] > div > div { gap:3px !important; }
+#panel-p1r [data-block="fc-services"] > div > div > div { padding:4px 5px !important; }
+#panel-p1r [data-block="fc-cta"],
+#panel-p1r [data-block="fc-web"],
+#panel-p1r [data-block="fc-steps"] { margin-top:4px !important; }
+#panel-p1r [data-block="fc-web"] p { margin:0 !important; line-height:1.5; }
+#panel-p1r [data-block="fc-steps"] > div { padding:5px 8px !important; }
+#panel-p1r [data-block="fc-steps"] > div > div { gap:4px !important; }
+#panel-p1r [data-block="fc-steps"] p[contenteditable] { line-height:1.3; }
+/* ── p2l (what we treat) fit ── */
+#panel-p2l .wound-card { margin-bottom:2px !important; padding:3px 7px 3px 7px !important; gap:5px !important; }
+#panel-p2l .wc-icon { width:22px !important; height:22px !important; flex-shrink:0 !important; }
+#panel-p2l .wc-icon svg { width:12px !important; height:12px !important; }
+#panel-p2l .wound-card .wc-name { font-size:8.5pt !important; margin-bottom:1px !important; }
+#panel-p2l .wound-card .wc-desc { font-size:7.5pt !important; line-height:1.32 !important; }
+#panel-p2l [data-block="im-section-hd"] > div:first-child { margin:3px 0 2px !important; }
+#panel-p2l [data-block="im-section-hd"] > div:last-child { padding:4px 7px !important; margin-bottom:2px !important; }
+#panel-p2l [data-block="im-section-hd"] p { font-size:7pt !important; line-height:1.4 !important; }
+#panel-p2l [data-block="wd-hd"] { margin-bottom:0 !important; }
+#panel-p2l [data-block="wd-hd"] .eyebrow { margin-bottom:2px !important; }
+#panel-p2l [data-block="wd-hd"] h2 { margin-bottom:2px !important; font-size:9pt !important; }
+#panel-p2l [data-block="wd-section-wc"] > div { margin:1px 0 2px !important; }
+#panel-p2l [data-block="im-section-hd"] > div:first-child span { font-size:5.5pt !important; }
+#panel-p2l .im-card { margin-bottom:2px !important; padding:2px 7px !important; }
+/* ── p2m (faq) fit ── */
+#panel-p2m [data-block="faq-photo"] img { height:110px !important; }
+#panel-p2m [data-block="faq-photo"] > div { margin-bottom:5px !important; }
+#panel-p2m [data-block="faq-hd"] h2 { margin-bottom:3px !important; }
+#panel-p2m .faq-item { margin-bottom:7px !important; }
+#panel-p2m .faq-q { padding:7px 11px !important; font-size:8.5pt !important; }
+#panel-p2m .faq-a { padding:6px 11px !important; font-size:8pt !important; line-height:1.42 !important; }
+#panel-p2m .stat-bubble { padding:5px 7px !important; }
+#panel-p2m .stat-num { font-size:11pt !important; }
+#panel-p2m .stat-lbl { font-size:6pt !important; }
+/* ── p2r (outside middle) fit ── */
+#panel-p2r [data-block="om-why"],
+#panel-p2r [data-block="om-hours"] { margin-top:10px !important; }
+#panel-p2r [data-block="om-counties"] { margin-top:9px !important; }
+#panel-p2r .county-pill { font-size:7pt; padding:3px 6px; }
+#panel-p2r [data-block="om-photo"] img { height:140px !important; }
+#panel-p2r [data-block="om-photo"] > div { margin-bottom:8px !important; }
+#panel-p2r [data-block="om-contact"] > div { padding:10px 12px !important; }
+#panel-p2r [data-block="om-contact"] > div > div { gap:5px !important; }
+#panel-p2r [data-block="om-counties"] > div { padding:9px 10px !important; }
+#panel-p2r .county-pill-grid { gap:4px !important; }
+#panel-p2r [data-block="om-why"] .eyebrow { margin-bottom:7px !important; }
+#panel-p2r [data-block="om-why"] > div:last-child { gap:8px !important; }
+#panel-p2r [data-block="om-why"] > div:last-child > div { padding:8px 9px !important; }
+#panel-p2r [data-block="om-hours"] > div { padding:12px 14px !important; }
+#panel-p2r [data-block="om-hours"] > div > div:last-child { gap:10px !important; }
+.edit-mode .panel-inner { overflow-y:auto; }
+.edit-mode .panel::after {
+  content:attr(data-label);
+  position:absolute; bottom:5px; left:50%;
+  transform:translateX(-50%);
+  font-size:6.5pt; color:rgba(0,0,0,.2);
+  text-transform:uppercase; letter-spacing:.1em; pointer-events:none;
+}
+
+/* ════════════════════ SORTABLE / DRAG ════════════════════ */
+.sortable-zone { display:flex; flex-direction:column; min-height:100%; }
+.block { position:relative; }
+.block .drag-handle {
+  display:none; position:absolute; left:-18px; top:50%;
+  transform:translateY(-50%);
+  width:16px; height:28px; cursor:grab;
+  align-items:center; justify-content:center;
+  color:rgba(0,100,200,.55); font-size:13pt;
+  user-select:none; border-radius:3px;
+  background:rgba(137,180,250,.12); z-index:100;
+}
+.edit-mode .panel-inner { padding-left:0.45in; }
+.edit-mode .block:hover .drag-handle { display:flex; }
+.edit-mode .block:hover {
+  outline:2px dashed rgba(137,180,250,.65);
+  outline-offset:2px; border-radius:3px;
+}
+.edit-mode .block.selected {
+  outline:2px solid var(--ui-accent) !important; border-radius:3px;
+}
+.sortable-ghost { opacity:.25; }
+.sortable-drag { opacity:.9; box-shadow:0 8px 30px rgba(0,0,0,.35); }
+.sortable-chosen { outline:2px dashed #89b4fa !important; border-radius:3px; }
+.edit-mode [contenteditable="true"] { outline:none; cursor:text; }
+.edit-mode [contenteditable="true"]:focus { background:rgba(137,180,250,.07); border-radius:2px; }
+.edit-mode [contenteditable="true"]:empty::after {
+  content:attr(data-placeholder); color:rgba(0,0,0,.25);
+  pointer-events:none; font-style:italic;
+}
+
+/* ════════════════════ BROCHURE CONTENT STYLES ════════════════════ */
+.bg-teal    { background:var(--teal); color:var(--white); }
+.bg-teal-dk { background:var(--teal-dk); color:var(--white); }
+.bg-teal-lt { background:var(--teal-lt); }
+.text-teal  { color:var(--teal); }
+.text-accent{ color:var(--accent); }
+.text-muted { color:var(--muted); font-size:8pt; line-height:1.5; }
+.small      { font-size:7.5pt; }
+.center     { text-align:center; }
+.mt-sm      { margin-top:0.08in; }
+.mt-md      { margin-top:0.15in; }
+
+/* Section title — gradient band style */
+.section-title {
+  font-family: var(--font-head);
+  font-size:9pt; font-weight:900; color:var(--teal-dk);
+  text-transform:uppercase; letter-spacing:.1em;
+  padding:5px 12px 5px 12px;
+  background:linear-gradient(to right, rgba(26,111,163,.12), transparent);
+  border-left:4px solid var(--accent);
+  border-radius:0 30px 30px 0;
+  margin-bottom:8px; line-height:1.3;
+  display:block;
+}
+.bg-teal .section-title, .bg-teal-dk .section-title {
+  color:var(--white); border-left-color:var(--accent);
+  background:linear-gradient(to right, rgba(255,255,255,.14), transparent);
+}
+
+/* White-panel heading (used directly as inline style overrides) */
+.panel-heading {
+  font-size:11pt; font-weight:900; color:var(--teal-dk);
+  text-transform:uppercase; letter-spacing:.05em;
+  text-align:center; margin-bottom:0.1in;
+}
+
+.divider {
+  border:none;
+  border-top:1px solid rgba(26,111,163,.12);
+  margin:5px 0;
+  position:relative;
+}
+.bg-teal-dk .divider { border-top-color:rgba(255,255,255,.18); }
+
+/* Treatment list — clean dash rows */
+ul.treat-list { list-style:none; padding:0; margin:0; }
+ul.treat-list li {
+  padding:5px 0 5px 16px; position:relative;
+  font-family:var(--font-body); font-size:8.5pt; color:var(--white);
+  border-bottom:1px solid rgba(255,255,255,.08);
+  line-height:1.45; font-weight:500;
+}
+ul.treat-list li:last-child { border-bottom:none; }
+ul.treat-list li::before {
+  content:"";
+  position:absolute; left:2px; top:50%; transform:translateY(-50%);
+  width:6px; height:6px; border-radius:50%;
+  background:var(--accent); box-shadow:0 0 0 2px rgba(244,160,28,.25);
+}
+
+/* Generic arrow list */
+ul.list { list-style:none; padding:0; }
+ul.list li { padding:4px 0 4px 16px; position:relative; font-size:8.5pt; color:var(--text); line-height:1.4; }
+ul.list li::before { content:"▸"; position:absolute; left:0; color:var(--accent); font-size:8pt; top:4px; }
+.bg-teal ul.list li, .bg-teal-dk ul.list li { color:var(--white); }
+
+/* Qualified checklist */
+ul.check-list { list-style:none; padding:0; margin:0; }
+ul.check-list li {
+  padding:5px 0 5px 26px; position:relative;
+  font-size:8.5pt; font-weight:500; color:var(--text); line-height:1.5;
+  border-bottom:1px solid rgba(26,111,163,.08);
+}
+ul.check-list li:last-child { border-bottom:none; }
+ul.check-list li::before {
+  content:"✓";
+  position:absolute; left:0; top:5px;
+  background:linear-gradient(135deg, var(--teal), var(--teal-dk));
+  color:#fff; font-weight:900; font-size:6.5pt;
+  width:15px; height:15px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  line-height:1; box-shadow:0 1px 4px rgba(13,80,128,.25);
+}
+ul.check-list li ul { list-style:none; padding-left:12px; margin-top:4px; }
+ul.check-list li ul li { border-bottom:none; font-size:8pt; color:var(--muted); padding:2px 0 2px 16px; }
+ul.check-list li ul li::before { content:"–"; color:var(--muted); font-weight:400; }
+
+/* Insurance accepted pill list */
+ul.ins-list { list-style:none; padding:0; margin:0; }
+ul.ins-list li {
+  display:flex; align-items:center; gap:10px;
+  padding:9px 13px; margin-bottom:7px;
+  background:linear-gradient(to right, rgba(255,255,255,.18), rgba(255,255,255,.08));
+  border:1px solid rgba(255,255,255,.18);
+  border-left:4px solid var(--accent);
+  border-radius:0 var(--radius) var(--radius) 0;
+  font-size:9pt; color:var(--white); font-weight:700;
+  letter-spacing:.02em;
+  box-shadow:0 2px 8px rgba(0,0,0,.12);
+}
+ul.ins-list li::before {
+  content:"✓";
+  width:18px; height:18px; flex-shrink:0;
+  border-radius:50%; background:var(--accent);
+  color:#fff; font-size:8pt; font-weight:900;
+  display:flex; align-items:center; justify-content:center;
+  box-shadow:0 1px 4px rgba(244,160,28,.4);
+}
+
+/* Step cards */
+.step-card {
+  display:flex; align-items:flex-start;
+  gap:10px; margin-bottom:9px;
+  padding:9px 11px;
+  background:rgba(26,111,163,.05);
+  border-radius:var(--radius);
+  border-left:3px solid var(--teal);
+  box-shadow:var(--shadow-sm);
+}
+.step-card:last-child { margin-bottom:0; }
+.step-num {
+  width:24px; height:24px; border-radius:50%;
+  background:linear-gradient(135deg,var(--teal),var(--teal-dk));
+  color:var(--white);
+  font-family:var(--font-head); font-weight:900; font-size:9pt;
+  display:flex; align-items:center; justify-content:center;
+  flex-shrink:0; box-shadow:0 2px 6px rgba(13,80,128,.25);
+}
+.step-card strong { font-size:8.5pt; color:var(--teal-dk); display:block; margin-bottom:2px; font-family:var(--font-head); }
+.step-card .text-muted { font-size:7.5pt; }
+
+/* Back-panel step cards (dark bg) */
+.step-card-dk {
+  display:flex; align-items:flex-start;
+  gap:10px; margin-bottom:9px;
+  padding:9px 12px;
+  background:linear-gradient(135deg, rgba(255,255,255,.13), rgba(255,255,255,.05));
+  border:1px solid rgba(255,255,255,.14);
+  border-radius:var(--radius);
+  border-left:4px solid var(--accent);
+  box-shadow:0 2px 10px rgba(0,0,0,.15);
+}
+.step-card-dk .step-num-dk {
+  width:24px; height:24px; border-radius:50%;
+  background:linear-gradient(135deg,var(--accent),var(--accent-dk)); color:#fff;
+  font-family:var(--font-head); font-weight:900; font-size:8.5pt;
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  box-shadow:0 2px 8px rgba(244,160,28,.45);
+}
+.step-card-dk strong  { color:var(--white); font-size:9pt; display:block; font-family:var(--font-head); letter-spacing:.01em; }
+.step-card-dk span    { color:rgba(255,255,255,.8); font-size:8pt; line-height:1.45; margin-top:1px; display:block; }
+
+.tag {
+  display:inline-block; background:var(--teal-lt); color:var(--teal-dk);
+  border:1px solid rgba(26,111,163,.25); border-radius:20px;
+  padding:2px 9px; font-size:7.5pt; font-weight:600; margin:2px 2px 2px 0;
+}
+.info-row { display:flex; align-items:flex-start; margin-bottom:7px; }
+.info-icon { font-size:11pt; margin-right:8px; color:var(--accent); flex-shrink:0; margin-top:1px; }
+.quote-block {
+  background:var(--teal-lt); border-left:4px solid var(--teal);
+  padding:9px 12px; margin-bottom:0.08in; border-radius:0 5px 5px 0;
+  font-size:8pt; font-style:italic; color:var(--teal-dk); line-height:1.55;
+}
+.quote-author { margin-top:5px; font-style:normal; font-weight:700; color:var(--teal); font-size:7.5pt; }
+.team-member { display:flex; align-items:center; margin-bottom:5px; }
+.team-avatar {
+  width:26px; height:26px; border-radius:50%;
+  background:var(--teal); color:var(--white);
+  display:flex; align-items:center; justify-content:center;
+  font-size:10pt; font-weight:700; flex-shrink:0; margin-right:8px;
+}
+
+/* Callout / CTA box */
+.cta-box {
+  border-radius:var(--radius);
+  padding:8px 12px;
+  background:linear-gradient(145deg, #0a3f65 0%, var(--teal-dk) 100%);
+  color:var(--white); text-align:center;
+  box-shadow:0 6px 24px rgba(13,80,128,.45), inset 0 1px 0 rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.1);
+  border-top:3px solid var(--accent);
+  position:relative; overflow:hidden;
+}
+.cta-box::before {
+  content:'';
+  position:absolute; top:-30px; right:-20px;
+  width:80px; height:80px; border-radius:50%;
+  background:rgba(255,255,255,.04);
+  pointer-events:none;
+}
+.cta-box .cta-title  { font-family:var(--font-head); font-size:9pt; font-weight:800; color:var(--white); margin-bottom:3px; letter-spacing:.02em; }
+.cta-box .cta-sub    { font-size:7pt; color:rgba(255,255,255,.72); margin-top:3px; line-height:1.45; }
+.cta-box .cta-phone  { font-family:var(--font-head); font-size:12pt; font-weight:900; color:var(--accent); letter-spacing:.04em; text-shadow:0 1px 4px rgba(0,0,0,.25); }
+
+/* Contact card (on white panels) */
+.contact-card {
+  background:linear-gradient(135deg, var(--teal-dk) 0%, var(--teal) 100%);
+  border-radius:var(--radius);
+  padding:10px 13px;
+  text-align:center;
+  box-shadow:var(--shadow-md);
+  position:relative; overflow:hidden;
+}
+.contact-card::before {
+  content:'';
+  position:absolute; bottom:-15px; right:-15px;
+  width:70px; height:70px; border-radius:50%;
+  background:rgba(255,255,255,.06); pointer-events:none;
+}
+.contact-card .cc-name { font-family:var(--font-head); font-size:9.5pt; font-weight:900; color:#fff; text-transform:uppercase; letter-spacing:.07em; margin-bottom:7px; border-bottom:1px solid rgba(255,255,255,.2); padding-bottom:6px; }
+.contact-card .cc-line { font-size:8pt; color:rgba(255,255,255,.9); margin-bottom:3px; line-height:1.5; font-weight:500; }
+.contact-card .cc-line strong { color:#fff; }
+.contact-card .cc-counties { font-size:7.5pt; color:rgba(255,255,255,.7); margin-top:8px; line-height:1.55; }
+
+/* Mission text box */
+.mission-box {
+  background:linear-gradient(135deg,var(--teal-lt),#f0f8ff);
+  border-left:4px solid var(--teal);
+  border-radius:0 8px 8px 0;
+  padding:5px 10px;
+  font-size:8pt; color:var(--teal-dk);
+  line-height:1.45; font-style:italic;
+  box-shadow:var(--shadow-sm);
+  font-weight:500;
+}
+
+/* Tagline ribbon */
+.tagline-ribbon {
+  background:var(--teal);
+  border-radius:5px; padding:9px 14px;
+  text-align:center;
+}
+.tagline-ribbon p { color:var(--white); font-size:10pt; font-weight:700; font-style:italic; }
+
+/* Section label (small uppercase eyebrow) */
+.eyebrow {
+  font-family:var(--font-head);
+  font-size:6.5pt; font-weight:800; text-transform:uppercase;
+  letter-spacing:.18em; color:var(--accent); margin-bottom:4px;
+  display:flex; align-items:center; gap:6px;
+  justify-content:flex-start;
+}
+.eyebrow.center { justify-content:center; }
+.eyebrow::before {
+  content:''; display:inline-block;
+  width:16px; height:2px; border-radius:2px;
+  background:var(--accent); flex-shrink:0;
+}
+.eyebrow.center::before, .eyebrow.center::after {
+  content:''; display:inline-block;
+  width:16px; height:2px; border-radius:2px;
+  background:var(--accent); flex-shrink:0;
+}
+.bg-teal-dk .eyebrow { color:rgba(244,160,28,.95); }
+.bg-teal-dk .eyebrow::before,
+.bg-teal-dk .eyebrow::after { background:rgba(244,160,28,.75); }
+
+/* ── Wound description cards ── */
+.wound-card {
+  padding:5px 9px 5px 8px;
+  border-left:3px solid var(--teal);
+  background:linear-gradient(to right, rgba(26,111,163,.07), rgba(26,111,163,.02));
+  border-radius:0 var(--radius) var(--radius) 0;
+  margin-bottom:5px;
+  box-shadow:0 1px 5px rgba(13,80,128,.09);
+  display:flex; align-items:flex-start; gap:7px;
+}
+.wound-card.im-card {
+  border-left-color:var(--accent);
+  background:linear-gradient(to right, rgba(244,160,28,.09), rgba(244,160,28,.02));
+}
+.wound-card.im-card .wc-icon {
+  background:linear-gradient(135deg, var(--accent-dk), var(--accent));
+}
+.wound-card .wc-name { font-family:var(--font-head); font-size:8pt; font-weight:800; color:var(--teal-dk); margin-bottom:1px; letter-spacing:.01em; }
+.wound-card.im-card .wc-name { color:var(--accent-dk); }
+.wound-card .wc-desc { font-size:6.5pt; color:var(--muted); line-height:1.4; font-weight:400; }
+.wc-icon {
+  width:26px; height:26px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  border-radius:6px;
+  background:linear-gradient(135deg, var(--teal-dk), var(--teal));
+  box-shadow:0 2px 6px rgba(13,80,128,.28);
+}
+.wc-icon svg { width:16px; height:16px; }
+.hero-img-wrap { margin-bottom:6px; border-radius:8px; overflow:hidden; box-shadow:var(--shadow-md); }
+.hero-img-wrap img { width:100%; height:55px; object-fit:cover; object-position:center 35%; display:block; }
+.step-card-dk .step-num-dk svg { width:16px; height:16px; }
+
+/* ── By the Numbers stats row ── */
+.stats-row { display:flex; gap:4px; justify-content:center; margin:3px 0 5px; }
+.stat-bubble {
+  flex:1; background:rgba(255,255,255,.13); border:1px solid rgba(255,255,255,.22);
+  border-radius:8px; padding:4px 2px; text-align:center;
+}
+.stat-bubble .stat-num { font-family:var(--font-head); font-size:10pt; font-weight:900; color:var(--accent); line-height:1.1; }
+.stat-bubble .stat-lbl { font-size:6pt; color:rgba(255,255,255,.9); font-weight:700; text-transform:uppercase; letter-spacing:.04em; margin-top:1px; }
+
+/* ── Healing Journey stages ── */
+.heal-wrap { margin:5px 0; }
+.heal-row { display:flex; align-items:center; gap:5px; margin-bottom:7px; }
+.heal-dot {
+  width:20px; height:20px; border-radius:50%; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  font-size:6pt; font-weight:900; font-family:var(--font-head); color:#fff;
+}
+.heal-label { font-size:7.5pt; font-weight:800; color:var(--teal-dk); min-width:40px; font-family:var(--font-head); flex-shrink:0; }
+.heal-bar-wrap { flex:1; }
+.heal-bar-bg { background:var(--teal-lt); border-radius:4px; height:5px; overflow:hidden; margin-bottom:2px; }
+.heal-bar-fill { height:100%; border-radius:4px; }
+.heal-bar-desc { font-size:6.5pt; color:var(--text); line-height:1.35; }
+
+/* ── County map infographic ── */
+.county-map-box {
+  background:linear-gradient(135deg,var(--teal-lt),#f4f9ff);
+  border:1px solid rgba(26,111,163,.2); border-radius:8px;
+  padding:8px 10px; margin:4px 0;
+  display:flex; gap:10px; align-items:center;
+}
+.county-legend { flex:1; }
+.county-legend-title { font-size:7pt; font-weight:800; color:var(--teal-dk); text-transform:uppercase; letter-spacing:.08em; margin-bottom:4px; }
+.county-pill-grid { display:grid; grid-template-columns:1fr 1fr; gap:3px; }
+.county-pill {
+  font-size:7.5pt; font-weight:700; color:var(--teal-dk);
+  background:rgba(26,111,163,.1); border-radius:4px; padding:2px 5px;
+  display:flex; align-items:center; gap:3px;
+}
+.county-pill::before { content:''; width:5px; height:5px; border-radius:50%; background:var(--teal); flex-shrink:0; }
+
+/* ── FAQ items ── */
+.faq-item {
+  margin-bottom:3px;
+  border-radius:var(--radius);
+  overflow:hidden;
+  box-shadow:0 2px 8px rgba(0,0,0,.1);
+  border:1px solid rgba(26,111,163,.1);
+}
+.faq-q {
+  background:linear-gradient(135deg,var(--teal),var(--teal-dk));
+  color:var(--white);
+  font-family:var(--font-head); font-size:7.5pt;
+  font-weight:800; letter-spacing:.01em;
+  padding:5px 10px;
+  border-radius:var(--radius) var(--radius) 0 0;
+  line-height:1.3;
+}
+.faq-a {
+  background:var(--white);
+  border-top:none;
+  font-size:7.5pt; font-weight:400;
+  color:var(--text);
+  padding:5px 10px;
+  line-height:1.45;
+  border-radius:0 0 var(--radius) var(--radius);
+}
+.bg-teal-dk .faq-q { background:rgba(255,255,255,.15); color:var(--white); border-radius:var(--radius); }
+.bg-teal-dk .faq-a { background:rgba(255,255,255,.07); border-color:rgba(255,255,255,.12); color:rgba(255,255,255,.88); border-radius:0 0 var(--radius) var(--radius); border-top:none; }
+
+/* ── Team member cards ── */
+.team-card {
+  display:flex;
+  align-items:flex-start;
+  gap:8px;
+  padding:7px 11px;
+  background:linear-gradient(to right, rgba(26,111,163,.08), rgba(26,111,163,.02));
+  border-radius:var(--radius);
+  margin-bottom:6px;
+  border-left:4px solid var(--teal);
+  box-shadow:0 1px 6px rgba(13,80,128,.1);
+}
+.team-card .tc-avatar {
+  width:28px; height:28px; border-radius:50%;
+  background:linear-gradient(135deg, var(--teal), var(--teal-dk));
+  color:var(--white); font-family:var(--font-head); font-size:8pt; font-weight:900;
+  display:flex; align-items:center; justify-content:center;
+  flex-shrink:0; box-shadow:0 2px 7px rgba(13,80,128,.28);
+}
+.team-card .tc-name  { font-family:var(--font-head); font-size:8pt; font-weight:800; color:var(--teal-dk); letter-spacing:.01em; line-height:1.2; }
+.team-card .tc-role  { font-size:6.8pt; color:var(--muted); line-height:1.4; margin-top:2px; }
+
+/* ════════════════════ PRINT ════════════════════ */
+@media print {
+  /* ── Reset zoom/transform that breaks print layout ── */
+  #brochure-canvas {
+    transform: none !important;
+    margin: 0 !important;
+    width: 11in !important;
+  }
+  body { padding:0 !important; background:none !important; overflow:visible !important; }
+  #topbar,#sidebar,#block-toolbar,#add-block-menu,.page-label,.drag-handle { display:none !important; }
+  .panel::after { display:none !important; content:none !important; }
+  .page {
+    margin: 0 !important;
+    box-shadow: none !important;
+    page-break-after: always !important;
+    break-after: page !important;
+    width: 11in !important;
+    height: 8.5in !important;
+    overflow: hidden !important;
+    display: flex !important;
+  }
+  .panel { overflow: hidden !important; }
+  .panel-inner { overflow: hidden !important; padding-left:0.38in !important; }
+  .block { outline:none !important; }
+
+  /* ── Maximum print resolution ── */
+  @page { size: 11in 8.5in landscape; margin: 0; }
+  html, body { width: 11in; height: 8.5in; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+
+  /* ── Force ALL backgrounds, gradients & colors to print ── */
+  *, *::before, *::after {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  /* ── Explicit hardcoded colors for dark panels (CSS vars unreliable in print) ── */
+  .bg-teal-dk { background-color: #0d5080 !important; }
+  .bg-teal    { background-color: #1a6fa3 !important; }
+  .bg-teal-lt { background-color: #e8f3fc !important; }
+
+  /* All text on dark panels must be white */
+  .bg-teal-dk, .bg-teal-dk * { color: #ffffff !important; }
+
+  /* Insurance list pills — opaque so text is visible */
+  ul.ins-list li {
+    background: rgba(255,255,255,0.18) !important;
+    background-color: #1b6ea0 !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255,255,255,0.3) !important;
+  }
+  ul.ins-list li::before { background: #f4a01c !important; }
+
+  /* Step cards on dark bg */
+  .step-card-dk {
+    background: rgba(255,255,255,0.1) !important;
+    background-color: #0f5f94 !important;
+    border-left-color: #f4a01c !important;
+  }
+  .step-card-dk .step-num-dk { background: #f4a01c !important; color: #fff !important; }
+
+  /* Eyebrow on dark bg */
+  .bg-teal-dk .eyebrow { color: #f4a01c !important; }
+  .bg-teal-dk .section-title { color: #ffffff !important; border-left-color: #f4a01c !important; }
+
+  /* CTA box */
+  .cta-box { background: #0d5080 !important; }
+  .cta-box .cta-phone { color: #f4a01c !important; }
+
+  /* Front cover gradient panel */
+  #panel-p1r { background: linear-gradient(175deg, #0d5080 0%, #1a6fa3 42%, #e8f3fc 42%, #f4f9fd 100%) !important; }
+
+  /* FAQ dark bg */
+  .bg-teal-dk .faq-q { background: rgba(255,255,255,0.15) !important; background-color: #1b6ea0 !important; }
+  .bg-teal-dk .faq-a { background: rgba(255,255,255,0.07) !important; background-color: #0f5a8a !important; color: #ffffff !important; }
+
+  /* Contact card on white panel — now dark gradient */
+  .contact-card { background: #1a6fa3 !important; }
+  .contact-card .cc-name { color: #fff !important; }
+  .contact-card .cc-line { color: rgba(255,255,255,.9) !important; }
+
+  /* IM cards warm bg in print */
+  .wound-card.im-card { background-color: rgba(244,160,28,.08) !important; border-left-color: #d4880e !important; }
+  .wound-card.im-card .wc-name { color: #d4880e !important; }
+  .wound-card.im-card .wc-icon { background: #d4880e !important; }
+
+  /* Page size */
+  @page { size: 11in 8.5in landscape; margin: 0; }
+}
+body.print-mode #topbar,
+body.print-mode #sidebar,
+body.print-mode .page-label { display:none !important; }
+body.print-mode { padding-right:0 !important; }
+body.print-mode .page { margin:0.2in auto; box-shadow:0 2px 8px rgba(0,0,0,.15); }
+body.print-mode .drag-handle { display:none !important; }
+body.print-mode .block:hover,
+body.print-mode .block.selected { outline:none !important; }
+body.print-mode .panel-inner { padding-left:0.38in !important; padding-right:0.32in !important; overflow:hidden !important; }
+
+/* ════════════════════ ZOOM ════════════════════ */
+#brochure-canvas { transform-origin: top center; transition: transform .2s ease; will-change: transform; }
+#zoom-label { color:var(--ui-fg); font-size:8pt; min-width:34px; text-align:center; user-select:none; }
+
+/* ════════════════════ AUTO-SAVE TOAST ════════════════════ */
+#autosave-toast {
+  position:fixed; bottom:18px; right:18px;
+  background:#1e3a2f; color:#a6e3a1;
+  border:1px solid #2e5a3f; border-radius:6px;
+  padding:7px 14px; font-size:8pt;
+  z-index:9999; opacity:0; transition:opacity .3s;
+  pointer-events:none; display:flex; align-items:center; gap:6px;
+}
+#autosave-toast.show { opacity:1; }
+.as-dot { width:8px; height:8px; border-radius:50%; background:#a6e3a1; flex-shrink:0; }
+
+/* ════════════════════ SHORTCUTS MODAL ════════════════════ */
+#shortcuts-modal {
+  display:none; position:fixed; inset:0;
+  background:rgba(0,0,0,.65); z-index:99000;
+  align-items:center; justify-content:center;
+}
+#shortcuts-modal.open { display:flex; }
+#shortcuts-inner {
+  background:var(--ui-bg); border:1px solid var(--ui-border);
+  border-radius:10px; padding:24px 28px; min-width:340px; max-width:490px;
+  color:var(--ui-fg); max-height:90vh; overflow-y:auto;
+}
+#shortcuts-inner h3 { color:var(--ui-accent); font-size:12pt; margin-bottom:14px; }
+.sc-row { display:flex; justify-content:space-between; align-items:center; padding:5px 0; border-bottom:1px solid var(--ui-border); font-size:8.5pt; }
+.sc-row:last-of-type { border-bottom:none; }
+.sc-key { background:#313244; border-radius:4px; padding:2px 8px; font-family:monospace; color:var(--ui-accent); font-size:8pt; white-space:nowrap; }
+
+/* ════════════════════ ALIGN ACTIVE STATES ════════════════════ */
+.bt-btn.align-active { background:var(--ui-accent); color:#1e1e2e; }
+</style>
+</head>
+<body class="edit-mode">
+
+<!-- █ TOP BAR █ -->
+<div id="topbar">
+  <span class="brand">✚ Beyond <span>Brochure</span> Editor</span>
+  <div class="tb-sep"></div>
+  <button class="tb-btn active" id="btn-edit" onclick="setMode('edit')">✏️ Edit</button>
+  <button class="tb-btn" id="btn-preview" onclick="setMode('preview')">👁 Preview</button>
+  <div class="tb-sep"></div>
+  <button class="tb-btn" onclick="undoAction()" title="Ctrl+Z">↩ Undo</button>
+  <button class="tb-btn" onclick="redoAction()" title="Ctrl+Y">↪ Redo</button>
+  <div class="tb-sep"></div>
+  <button class="tb-btn success" onclick="saveHTML()">&#128190; Save HTML</button>
+  <button class="tb-btn" onclick="savePNG()" title="Export each page as a PNG image" style="background:#1e3a2f;color:#a6e3a1;border-color:#2e5a3f;">&#128247; Save PNG</button>
+  <button class="tb-btn" onclick="printBrochure()">🖨 Print</button>
+  <div class="tb-sep"></div>
+  <button class="tb-btn" id="btn-sidebar" onclick="toggleSidebar()">🎨 Theme</button>
+  <div class="tb-sep"></div>
+  <button class="tb-btn" onclick="zoomOut()" title="Zoom Out (Ctrl–)">🔍−</button>
+  <span id="zoom-label">75%</span>
+  <button class="tb-btn" onclick="zoomIn()" title="Zoom In (Ctrl+)">🔍+</button>
+  <button class="tb-btn" onclick="zoomFit()" title="Fit to screen">⊡ Fit</button>
+  <div class="tb-sep"></div>
+  <button class="tb-btn" onclick="document.getElementById('shortcuts-modal').classList.add('open')" title="Keyboard shortcuts">⌨ Shortcuts</button>
+  <span id="page-indicator">Page 1 = Outside &nbsp;|&nbsp; Page 2 = Inside · Drag ⠿ to reorder · Click text to edit</span>
+</div>
+
+<!-- █ FLOATING BLOCK TOOLBAR █ -->
+<div id="block-toolbar">
+  <span class="bt-label">Move:</span>
+  <button class="bt-btn" onclick="moveBlock('up')" title="Move Up">↑</button>
+  <button class="bt-btn" onclick="moveBlock('dn')" title="Move Down">↓</button>
+  <div class="bt-sep"></div>
+  <span class="bt-label">Text:</span>
+  <button class="bt-btn" onclick="fmt('bold')"><b>B</b></button>
+  <button class="bt-btn" onclick="fmt('italic')"><i>I</i></button>
+  <button class="bt-btn" onclick="fmt('underline')"><u>U</u></button>
+  <div class="bt-sep"></div>
+  <span class="bt-label">Align:</span>
+  <button class="bt-btn" id="bt-al" onclick="alignBlock('left')" title="Align Left">≡L</button>
+  <button class="bt-btn" id="bt-ac" onclick="alignBlock('center')" title="Center">≡C</button>
+  <button class="bt-btn" id="bt-ar" onclick="alignBlock('right')" title="Align Right">≡R</button>
+  <div class="bt-sep"></div>
+  <button class="bt-btn" onclick="changeFontSize(-1)" title="Shrink text">A-</button>
+  <button class="bt-btn" onclick="changeFontSize(1)" title="Grow text">A+</button>
+  <div class="bt-sep"></div>
+  <span class="bt-label">Color:</span>
+  <div class="bt-color-wrap" title="Text Color">
+    <span style="font-size:9pt;">A</span>
+    <input type="color" id="bt-textcolor" value="#2c2c2c" oninput="applyTextColor(this.value)">
+  </div>
+  <div class="bt-color-wrap" title="Block Background">
+    <span style="font-size:9pt;">▣</span>
+    <input type="color" id="bt-bgcolor" value="#ffffff" oninput="applyBlockBg(this.value)">
+  </div>
+  <div class="bt-sep"></div>
+  <button class="bt-btn" onclick="openAddMenu()" title="Insert block below">＋ Add</button>
+  <button class="bt-btn" onclick="duplicateBlock()" title="Duplicate">⊕ Dupe</button>
+  <button class="bt-btn" onclick="deleteBlock()" style="color:#f38ba8;" title="Delete block">⊗ Del</button>
+  <div class="bt-sep"></div>
+  <button class="bt-btn bt-close" onclick="selectBlock(null)" title="Close toolbar">✕</button>
+</div>
+
+<!-- █ ADD BLOCK MENU █ -->
+<div id="add-block-menu">
+  <div class="abm-item" onclick="addBlock('heading')">H  Heading</div>
+  <div class="abm-item" onclick="addBlock('text')">¶  Text Paragraph</div>
+  <div class="abm-item" onclick="addBlock('list')">≡  Bullet List</div>
+  <div class="abm-item" onclick="addBlock('divider')">—  Divider Line</div>
+  <div class="abm-item" onclick="addBlock('quote')">❝  Quote / Testimonial</div>
+  <div class="abm-item" onclick="addBlock('cta')">◉  Call-to-Action Box</div>
+  <div class="abm-item" onclick="addBlock('contact')">📞  Contact Info Row</div>
+  <div class="abm-item" onclick="addBlock('tag-row')">🏷  Tag / Badge Row</div>
+  <div class="abm-item" onclick="addBlock('image')">🖼  Image / Logo</div>
+  <div class="abm-item" onclick="addBlock('spacer')">↕  Spacer / Gap</div>
+</div>
+
+<!-- █ RIGHT SIDEBAR █ -->
+<div id="sidebar">
+  <div class="sb-section">
+    <div class="sb-title">🎨 Brand Colors</div>
+    <div class="sb-row"><label>Primary</label><input type="color" value="#006d77" oninput="setCssVar('--teal',this.value)"></div>
+    <div class="sb-row"><label>Dark Primary</label><input type="color" value="#004e56" oninput="setCssVar('--teal-dk',this.value)"></div>
+    <div class="sb-row"><label>Light BG</label><input type="color" value="#e8f5f6" oninput="setCssVar('--teal-lt',this.value)"></div>
+    <div class="sb-row"><label>Accent</label><input type="color" value="#f4a01c" oninput="setCssVar('--accent',this.value)"></div>
+    <div class="sb-row"><label>Body Text</label><input type="color" value="#2c2c2c" oninput="setCssVar('--text',this.value)"></div>
+    <div class="sb-row"><label>Muted Text</label><input type="color" value="#5a5a5a" oninput="setCssVar('--muted',this.value)"></div>
+  </div>
+  <div class="sb-section">
+    <div class="sb-title">🔤 Typography</div>
+    <div class="sb-row">
+      <label>Font</label>
+      <select onchange="setFont(this.value)">
+        <option value="'Segoe UI',Arial,sans-serif">Segoe UI</option>
+        <option value="Arial,sans-serif">Arial</option>
+        <option value="'Times New Roman',serif">Times New Roman</option>
+        <option value="Georgia,serif">Georgia</option>
+        <option value="Verdana,sans-serif">Verdana</option>
+        <option value="Calibri,sans-serif">Calibri</option>
+      </select>
+    </div>
+    <div class="sb-row">
+      <label>Base Size</label>
+      <input type="range" min="7" max="13" value="9" oninput="setBaseSize(this.value)">
+      <span id="sz-label" style="color:var(--ui-fg);font-size:7.5pt;width:28px;">9pt</span>
+    </div>
+    <div class="sb-row">
+      <label>Line Height</label>
+      <input type="range" min="120" max="200" value="145" oninput="setLineHeight(this.value/100)">
+      <span id="lh-label" style="color:var(--ui-fg);font-size:7.5pt;width:32px;">1.45</span>
+    </div>
+  </div>
+  <div class="sb-section">
+    <div class="sb-title">🪟 Panel Backgrounds</div>
+    <p class="sb-hint">Pick each panel's background color.</p>
+    <div id="panel-color-list"></div>
+  </div>
+  <div class="sb-section">
+    <div class="sb-title">🔄 Color Presets</div>
+    <button class="sb-btn" onclick="applyPreset('teal')">🩺 Medical Teal (default)</button>
+    <button class="sb-btn" onclick="applyPreset('navy')">🔵 Navy &amp; Gold</button>
+    <button class="sb-btn" onclick="applyPreset('forest')">🌿 Forest Green</button>
+    <button class="sb-btn" onclick="applyPreset('crimson')">❤️ Crimson &amp; Silver</button>
+    <button class="sb-btn" onclick="applyPreset('purple')">💜 Purple Professional</button>
+  </div>
+  <div class="sb-section">
+    <div class="sb-title">🎛 Canvas</div>
+    <div class="sb-row">
+      <label>BG Color</label>
+      <input type="color" value="#b8bec9" oninput="document.body.style.background=this.value" title="Editor canvas background">
+    </div>
+    <div class="sb-row">
+      <label>Zoom</label>
+      <input type="range" min="30" max="120" value="75" id="sb-zoom-range" oninput="setZoom(this.value/100)">
+      <span id="sb-zoom-lbl" style="color:var(--ui-fg);font-size:7.5pt;width:32px;">75%</span>
+    </div>
+  </div>
+  <div class="sb-section">
+    <div class="sb-title">💾 Auto-Save</div>
+    <p class="sb-hint" id="autosave-status">Saves to browser storage on every change.</p>
+    <button class="sb-btn" onclick="loadAutoSave()">🔄 Restore Last Save</button>
+    <button class="sb-btn" style="color:#f38ba8;" onclick="clearAutoSave()">🗑 Clear Saved Data</button>
+  </div>
+  <div class="sb-section">
+    <div class="sb-title">💾 Actions</div>
+    <button class="sb-btn" onclick="saveHTML()">💾 Save as HTML</button>
+    <button class="sb-btn" onclick="printBrochure()">🖨 Print Brochure</button>
+    <button class="sb-btn" onclick="setMode('preview')">👁 Preview Mode</button>
+    <button class="sb-btn" style="color:#f38ba8;border-color:#5e2030;background:#3b1c2c;" onclick="if(confirm('Reset all changes?'))location.reload()">♻ Reset All</button>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     SHORTCUTS MODAL
+══════════════════════════════════════════════════════════ -->
+<div id="shortcuts-modal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div id="shortcuts-inner">
+    <h3>⌨ Keyboard Shortcuts</h3>
+    <div class="sc-row"><span>Undo</span><span class="sc-key">Ctrl + Z</span></div>
+    <div class="sc-row"><span>Redo</span><span class="sc-key">Ctrl + Y</span></div>
+    <div class="sc-row"><span>Bold selected text</span><span class="sc-key">Ctrl + B</span></div>
+    <div class="sc-row"><span>Italic selected text</span><span class="sc-key">Ctrl + I</span></div>
+    <div class="sc-row"><span>Underline selected text</span><span class="sc-key">Ctrl + U</span></div>
+    <div class="sc-row"><span>Save HTML file</span><span class="sc-key">Ctrl + S</span></div>
+    <div class="sc-row"><span>Zoom In</span><span class="sc-key">Ctrl + =</span></div>
+    <div class="sc-row"><span>Zoom Out</span><span class="sc-key">Ctrl + −</span></div>
+    <div class="sc-row"><span>Fit to screen</span><span class="sc-key">Ctrl + 0</span></div>
+    <div class="sc-row"><span>Deselect / Close menu</span><span class="sc-key">Esc</span></div>
+    <div class="sc-row"><span>Move block up</span><span class="sc-key">Drag ⠿ handle</span></div>
+    <p style="margin-top:12px;font-size:7.5pt;color:#6c7086;">Click outside this box or press Esc to close.</p>
+    <button class="sb-btn" style="margin-top:10px;" onclick="document.getElementById('shortcuts-modal').classList.remove('open')">✕ Close</button>
+  </div>
+</div>
+<div id="autosave-toast"><span class="as-dot"></span>Auto-saved</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     PAGE 1 – OUTSIDE
+══════════════════════════════════════════════════════════ -->
+<div id="brochure-canvas">
+<div class="page" id="page1">
+  <span class="page-label">PAGE 1 – OUTSIDE &nbsp;(Right panel = Front Cover when folded)</span>
+
+  <!-- Back Cover -->
+  <div class="panel bg-teal-dk" id="panel-p1l" data-label="Back Cover">
+    <div class="panel-inner">
+      <div class="sortable-zone" id="sz-p1l">
+
+        <!-- Top photo banner -->
+        <div class="block" data-block="ins-photo-top">
+          <span class="drag-handle">⠿</span>
+          <div style="position:relative;border-radius:8px;overflow:hidden;margin-bottom:10px;box-shadow:0 3px 12px rgba(0,0,0,.35);">
+            <img src="assets/img/hero-care.jpg" alt="Home wound care visit" style="width:100%;height:72px;object-fit:cover;object-position:center 30%;display:block;">
+            <div style="position:absolute;inset:0;background:linear-gradient(to right,rgba(13,80,128,.75),rgba(13,80,128,.2));display:flex;align-items:center;padding:0 12px;">
+              <div>
+                <div style="color:var(--accent);font-size:6pt;font-weight:900;text-transform:uppercase;letter-spacing:.14em;font-family:'Montserrat',sans-serif;">Beyond Wound Care Inc.</div>
+                <div style="color:#fff;font-size:8.5pt;font-weight:800;font-family:'Montserrat',sans-serif;line-height:1.25;margin-top:2px;">Healing Starts at Home</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="block" data-block="ins-hd">
+          <span class="drag-handle">⠿</span>
+          <div class="eyebrow" style="text-align:center;">We Work With</div>
+          <h2 style="font-size:12pt;font-weight:900;color:var(--white);text-align:center;margin-bottom:12px;letter-spacing:.04em;" contenteditable="true">INSURANCE WE ACCEPT</h2>
+        </div>
+
+        <div class="block" data-block="ins-list">
+          <span class="drag-handle">⠿</span>
+          <ul class="ins-list" style="margin-bottom:12px;">
+            <li contenteditable="true">Medicare</li>
+            <li contenteditable="true">United Health Care &ndash; PPO</li>
+            <li contenteditable="true">Blue Cross Blue Shield - PPO</li>
+          </ul>
+        </div>
+
+        <!-- Mid photo strip -->
+        <div class="block" data-block="ins-photo-mid">
+          <span class="drag-handle">⠿</span>
+          <div style="position:relative;border-radius:8px;overflow:hidden;margin-bottom:10px;box-shadow:0 2px 10px rgba(0,0,0,.3);">
+            <img src="assets/img/insurance.jpg" alt="Insurance paperwork and coverage" style="width:100%;height:60px;object-fit:cover;object-position:center 40%;display:block;">
+            <div style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(13,80,128,.15),rgba(13,80,128,.65));display:flex;align-items:flex-end;padding:6px 10px;">
+              <span style="color:rgba(255,255,255,.92);font-size:6.5pt;font-weight:700;font-family:'Montserrat',sans-serif;letter-spacing:.02em;">&#10003;&nbsp; Accept most major insurance plans &mdash; we handle all billing</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="block" data-block="ins-process-hd">
+          <span class="drag-handle">⠿</span>
+          <div class="section-title" contenteditable="true">How It Works</div>
+        </div>
+
+        <div class="block" data-block="ins-step1">
+          <span class="drag-handle">⠿</span>
+          <div class="step-card-dk">
+            <div class="step-num-dk"><svg viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="3" width="16" height="21" rx="2" fill="white" opacity=".9"/><rect x="10" y="1" width="6" height="4" rx="1.5" fill="white" opacity=".65"/><path d="M9 11 L17 11" stroke="#0d5080" stroke-width="1.5" stroke-linecap="round"/><path d="M9 14 L17 14" stroke="#0d5080" stroke-width="1.5" stroke-linecap="round"/><path d="M9 17 L14 17" stroke="#0d5080" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+            <div><strong contenteditable="true">Referral</strong><br>
+            <span contenteditable="true">Home health &amp; clinics sends referral &amp; wound notes.</span></div>
+          </div>
+        </div>
+
+        <div class="block" data-block="ins-step2">
+          <span class="drag-handle">⠿</span>
+          <div class="step-card-dk">
+            <div class="step-num-dk"><svg viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13 2 L22 6 L22 14 Q22 21 13 24 Q4 21 4 14 L4 6 Z" fill="white" opacity=".9"/><path d="M9 13 L12 16 L18 10" stroke="#0d5080" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></div>
+            <div><strong contenteditable="true">Insurance Verified</strong><br>
+            <span contenteditable="true">We verify coverage, handle all billing.</span></div>
+          </div>
+        </div>
+
+        <div class="block" data-block="ins-step3">
+          <span class="drag-handle">⠿</span>
+          <div class="step-card-dk">
+            <div class="step-num-dk"><svg viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 12.5 L13 3 L23 12.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/><rect x="5" y="11.5" width="16" height="13" rx="1.5" fill="white" opacity=".9"/><rect x="11.5" y="13.5" width="3" height="7" rx="1" fill="#0d5080"/><rect x="8.5" y="16" width="9" height="3" rx="1" fill="#0d5080"/></svg></div>
+            <div><strong contenteditable="true">Care Begins at Home</strong><br>
+            <span contenteditable="true">Specialist visits within days of approval.</span></div>
+          </div>
+        </div>
+
+        <div class="block mt-sm" data-block="ins-avail">
+          <span class="drag-handle">⠿</span>
+          <p style="color:rgba(255,255,255,.9);font-size:8pt;line-height:1.55;text-align:center;" contenteditable="true">Home &amp; facility visits available.<br><strong style="color:var(--accent);">&#9990; 847.873.8693</strong></p>
+        </div>
+
+        <div class="block" data-block="team-cert" style="margin-top:6px;">
+          <span class="drag-handle">⠿</span>
+          <div style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:6px;padding:7px 10px;text-align:center;">
+            <div class="eyebrow" style="margin-bottom:4px;">Certifications &amp; Standards</div>
+            <p style="font-size:7pt;color:rgba(255,255,255,.85);line-height:1.5;" contenteditable="true">All clinicians are licensed in Illinois and follow <strong>AAWC</strong> &amp; <strong>CDC</strong> wound care standards. Fully insured &amp; background-checked.</p>
+          </div>
+        </div>
+
+        <div class="block" data-block="ins-referral">
+          <span class="drag-handle">⠿</span>
+          <p style="color:rgba(255,255,255,.65);font-size:7.5pt;text-align:center;" contenteditable="true">Referrals: <strong style="color:var(--white);">support@beyondwoundcare.com</strong></p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Outside Middle -->
+  <div class="panel" id="panel-p1m" data-label="Our Team">
+    <div class="panel-inner">
+      <div class="sortable-zone" id="sz-p1m">
+
+        <div class="block" data-block="team-hd">
+          <span class="drag-handle">⠇</span>
+          <div class="eyebrow">Meet the Experts</div>
+          <h2 style="font-size:10pt;font-weight:900;color:var(--teal-dk);margin-bottom:8px;letter-spacing:.04em;" contenteditable="true">OUR CARE TEAM</h2>
+        </div>
+
+        <!-- Care team photo -->
+        <div class="block" data-block="team-photo">
+          <span class="drag-handle">⠇</span>
+          <div class="hero-img-wrap" style="margin-bottom:8px;">
+            <img src="assets/img/care-team.jpg" alt="Beyond Wound Care team" style="height:80px;object-position:center 25%;">
+          </div>
+        </div>
+
+        <div class="block" data-block="team-intro">
+          <span class="drag-handle">⠇</span>
+          <div class="mission-box" style="margin-bottom:10px;" contenteditable="true">Our board-certified providers bring decades of combined clinical experience — delivering expert, compassionate care wherever you call home.</div>
+        </div>
+
+        <div class="block" data-block="team-1">
+          <span class="drag-handle">⠇</span>
+          <div class="team-card">
+            <div class="tc-avatar">MD</div>
+            <div>
+              <div class="tc-name" contenteditable="true">Medical Doctor</div>
+              <div class="tc-role" contenteditable="true">Provides diagnosis, treatment planning, and oversight of complex wound and medical cases.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="block" data-block="team-2">
+          <span class="drag-handle">⠇</span>
+          <div class="team-card">
+            <div class="tc-avatar">NP</div>
+            <div>
+              <div class="tc-name" contenteditable="true">Wound Care Provider</div>
+              <div class="tc-role" contenteditable="true">Advanced wound assessment, debridement, and treatment planning for complex wound cases.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="block" data-block="team-3">
+          <span class="drag-handle">⠇</span>
+          <div class="team-card">
+            <div class="tc-avatar">CC</div>
+            <div>
+              <div class="tc-name" contenteditable="true">Care Coordinator</div>
+              <div class="tc-role" contenteditable="true">Manages scheduling, physician communication, and ensures seamless continuity of your care plan.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Provider write-in space -->
+        <div class="block" data-block="team-provider-space" style="margin-top:4px;">
+          <span class="drag-handle">⠇</span>
+          <div style="border:1.5px dashed rgba(26,111,163,.35);border-radius:8px;padding:6px 10px;background:rgba(26,111,163,.03);">
+            <div style="font-size:5.5pt;font-weight:900;color:var(--teal-dk);text-transform:uppercase;letter-spacing:.12em;margin-bottom:6px;display:flex;align-items:center;gap:5px;"><span style="display:inline-block;width:12px;height:1.5px;background:var(--teal);border-radius:2px;"></span>Your Provider<span style="display:inline-block;width:12px;height:1.5px;background:var(--teal);border-radius:2px;"></span></div>
+            <div style="border-bottom:1px solid rgba(26,111,163,.25);margin-bottom:6px;padding-bottom:2px;">&nbsp;</div>
+            <div style="font-size:5.5pt;color:var(--muted);margin-bottom:5px;">Name &amp; Title</div>
+            <div style="border-bottom:1px solid rgba(26,111,163,.25);margin-bottom:6px;padding-bottom:2px;">&nbsp;</div>
+            <div style="font-size:5.5pt;color:var(--muted);margin-bottom:5px;">Phone / Contact</div>
+            <div style="border-bottom:1px solid rgba(26,111,163,.25);padding-bottom:2px;">&nbsp;</div>
+            <div style="font-size:5.5pt;color:var(--muted);margin-top:5px;">Office / Practice</div>
+          </div>
+        </div>
+
+        <!-- Healing Journey infographic -->
+        <div class="block" data-block="team-healing">
+          <span class="drag-handle">⠇</span>
+          <div class="section-title" style="color:var(--teal-dk);margin-bottom:4px;margin-top:6px;">Healing Journey</div>
+          <div class="heal-wrap">
+            <div class="heal-row" style="margin-bottom:2px;">
+              <div class="heal-dot" style="background:var(--teal-dk);">1</div>
+              <div class="heal-label">Assess</div>
+              <div class="heal-bar-wrap">
+                <div class="heal-bar-bg"><div class="heal-bar-fill" style="width:100%;background:var(--teal-dk);"></div></div>
+                <div class="heal-bar-desc">Full assessment of wounds and chronic medical condition</div>
+              </div>
+            </div>
+            <div class="heal-row" style="margin-bottom:2px;">
+              <div class="heal-dot" style="background:var(--teal);">2</div>
+              <div class="heal-label">Treat</div>
+              <div class="heal-bar-wrap">
+                <div class="heal-bar-bg"><div class="heal-bar-fill" style="width:78%;background:var(--teal);"></div></div>
+                <div class="heal-bar-desc">Treat underlying chronic conditions, advanced dressings, debridement &amp; infection control</div>
+              </div>
+            </div>
+            <div class="heal-row" style="margin-bottom:2px;">
+              <div class="heal-dot" style="background:#3a9ad4;">3</div>
+              <div class="heal-label">Monitor</div>
+              <div class="heal-bar-wrap">
+                <div class="heal-bar-bg"><div class="heal-bar-fill" style="width:55%;background:#3a9ad4;"></div></div>
+                <div class="heal-bar-desc">Regular visits, physician reporting &amp; plan updates</div>
+              </div>
+            </div>
+            <div class="heal-row" style="margin-bottom:2px;">
+              <div class="heal-dot" style="background:var(--accent);">4</div>
+              <div class="heal-label">Heal</div>
+              <div class="heal-bar-wrap">
+                <div class="heal-bar-bg"><div class="heal-bar-fill" style="width:35%;background:var(--accent);"></div></div>
+                <div class="heal-bar-desc">Ceased to be homebound &amp; all wounds closed — discharge planning &amp; education</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Front Cover -->
+  <div class="panel" id="panel-p1r" data-label="Front Cover" style="background:linear-gradient(175deg, var(--teal-dk) 0%, var(--teal) 42%, var(--teal-lt) 42%, #f4f9fd 100%);">
+    <div class="panel-inner" style="justify-content:space-between;padding-left:0.32in;">
+      <div class="sortable-zone" id="sz-p1r">
+
+        <div class="block" data-block="fc-logo" style="text-align:center;margin-bottom:8px;padding-top:0;margin-top:-0.1in;">
+          <span class="drag-handle">⠿</span>
+          <img src="assets/img/beyond.png" alt="Beyond Wound Care Logo" style="width:95px;height:95px;object-fit:contain;display:block;margin:0 auto;filter:drop-shadow(0 2px 6px rgba(0,0,0,.3));">
+        </div>
+
+        <div class="block" data-block="fc-tagline" style="text-align:center;margin-bottom:0.18in;">
+          <span class="drag-handle">⠿</span>
+          <div style="background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);border-radius:5px;padding:9px 14px;">
+            <p style="font-size:10.5pt;font-weight:700;color:#fff;font-style:italic;" contenteditable="true">"Specializing in Internal Medicine &amp; Wound Care Management"</p>
+          </div>
+        </div>
+
+        <div class="block" data-block="fc-address" style="text-align:center;margin-top:0.03in;">
+          <span class="drag-handle">⠿</span>
+          <p style="font-size:7.5pt;color:#fff;line-height:1.65;text-align:center;font-weight:600;text-shadow:0 1px 3px rgba(0,0,0,.25);" contenteditable="true">&#128205; 1340 Remington Rd. Suite P<br>Schaumburg, IL 60173<br>Phone: 847.873.8693 &nbsp;&bull;&nbsp; Fax: 847.873.8486</p>
+        </div>
+
+        <!-- Hero photo strip -->
+        <div class="block" data-block="fc-photo" style="margin-top:8px;">
+          <span class="drag-handle">⠿</span>
+          <div style="position:relative;border-radius:10px;overflow:hidden;box-shadow:0 4px 16px rgba(13,80,128,.35);">
+            <img src="assets/img/choose.jpg" alt="Beyond Wound Care specialist" style="width:100%;height:90px;object-fit:cover;object-position:center 30%;display:block;">
+            <div style="position:absolute;inset:0;background:linear-gradient(to right,rgba(13,80,128,.72) 0%,rgba(13,80,128,.15) 60%,transparent 100%);display:flex;align-items:center;padding:0 13px;">
+              <div>
+                <div style="color:var(--accent);font-size:5.5pt;font-weight:900;text-transform:uppercase;letter-spacing:.16em;font-family:'Montserrat',sans-serif;margin-bottom:2px;">Home · Facility · Assisted Living</div>
+                <div style="color:#fff;font-size:9pt;font-weight:900;font-family:'Montserrat',sans-serif;line-height:1.2;text-shadow:0 1px 4px rgba(0,0,0,.3);">Expert Care<br>At Your Door</div>
+              </div>
+            </div>
+            <!-- mini stat badges overlaid bottom-right -->
+            <div style="position:absolute;bottom:6px;right:8px;display:flex;gap:5px;">
+              <div style="background:rgba(13,80,128,.82);backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,.25);border-radius:6px;padding:3px 6px;text-align:center;">
+                <div style="font-family:'Montserrat',sans-serif;font-size:8.5pt;font-weight:900;color:var(--accent);line-height:1;">1000+</div>
+                <div style="font-size:5pt;color:rgba(255,255,255,.85);font-weight:700;text-transform:uppercase;letter-spacing:.04em;">Patients</div>
+              </div>
+              <div style="background:rgba(13,80,128,.82);backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,.25);border-radius:6px;padding:3px 6px;text-align:center;">
+                <div style="font-family:'Montserrat',sans-serif;font-size:8.5pt;font-weight:900;color:var(--accent);line-height:1;">10</div>
+                <div style="font-size:5pt;color:rgba(255,255,255,.85);font-weight:700;text-transform:uppercase;letter-spacing:.04em;">Counties</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="block mt-sm" data-block="fc-services" style="text-align:center;">
+          <span class="drag-handle">⠿</span>
+          <div style="background:linear-gradient(135deg,var(--teal-dk),#0a3f65);border-radius:10px;padding:8px 11px;box-shadow:0 3px 12px rgba(13,80,128,.3);border:1px solid rgba(255,255,255,.08);">
+            <p style="font-size:6pt;font-weight:900;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.13em;margin-bottom:7px;display:flex;align-items:center;gap:5px;justify-content:center;" contenteditable="true"><span style="display:inline-block;width:18px;height:1px;background:rgba(255,255,255,.3);"></span>Services at a Glance<span style="display:inline-block;width:18px;height:1px;background:rgba(255,255,255,.3);"></span></p>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;">
+              <div style="background:rgba(244,160,28,.18);border:1px solid rgba(244,160,28,.35);border-radius:7px;padding:5px 7px;display:flex;align-items:center;gap:5px;">
+                <span style="font-size:10pt;flex-shrink:0;">⚕️</span><span style="font-size:6.5pt;font-weight:700;color:var(--accent);line-height:1.25;" contenteditable="true">Internal Medicine</span>
+              </div>
+              <div style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:7px;padding:5px 7px;display:flex;align-items:center;gap:5px;">
+                <span style="font-size:10pt;flex-shrink:0;">🩹</span><span style="font-size:6.5pt;font-weight:700;color:#fff;line-height:1.25;" contenteditable="true">Pressure Ulcers</span>
+              </div>
+              <div style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:7px;padding:5px 7px;display:flex;align-items:center;gap:5px;">
+                <span style="font-size:10pt;flex-shrink:0;">💉</span><span style="font-size:6.5pt;font-weight:700;color:#fff;line-height:1.25;" contenteditable="true">Diabetic Wounds</span>
+              </div>
+              <div style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:7px;padding:5px 7px;display:flex;align-items:center;gap:5px;">
+                <span style="font-size:10pt;flex-shrink:0;">🫀</span><span style="font-size:6.5pt;font-weight:700;color:#fff;line-height:1.25;" contenteditable="true">Venous Ulcers</span>
+              </div>
+              <div style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:7px;padding:5px 7px;display:flex;align-items:center;gap:5px;">
+                <span style="font-size:10pt;flex-shrink:0;">🔬</span><span style="font-size:6.5pt;font-weight:700;color:#fff;line-height:1.25;" contenteditable="true">Infected Wounds</span>
+              </div>
+              <div style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:7px;padding:5px 7px;display:flex;align-items:center;gap:5px;">
+                <span style="font-size:10pt;flex-shrink:0;">🏥</span><span style="font-size:6.5pt;font-weight:700;color:#fff;line-height:1.25;" contenteditable="true">Post-Surgical Care</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="block mt-sm" data-block="fc-cta" style="text-align:center;">
+          <span class="drag-handle">⠿</span>
+          <div class="cta-box" style="padding:7px 12px;">
+            <div class="cta-title" contenteditable="true">&#128222; Call Us Now</div>
+            <div class="cta-phone" contenteditable="true">847.873.8693</div>
+            <div class="cta-sub" contenteditable="true">Serving Illinois — covered by Medicare</div>
+          </div>
+        </div>
+
+        <div class="block mt-sm" data-block="fc-web" style="text-align:center;">
+          <span class="drag-handle">⠿</span>
+          <p style="font-size:7.5pt;color:var(--teal-dk);font-weight:700;margin:0;" contenteditable="true">&#127760; www.beyondwoundcare.com</p>
+          <p style="font-size:7pt;color:var(--muted);font-style:italic;margin:1px 0 0;" contenteditable="true">support@beyondwoundcare.com</p>
+        </div>
+
+        <div class="block mt-sm" data-block="fc-steps">
+          <span class="drag-handle">⠿</span>
+          <div style="background:linear-gradient(135deg,rgba(26,111,163,.08),rgba(26,111,163,.03));border-radius:9px;padding:8px 10px;border:1px solid rgba(26,111,163,.15);">
+            <p style="font-size:6.5pt;font-weight:900;color:var(--teal-dk);text-transform:uppercase;letter-spacing:.09em;text-align:center;margin-bottom:7px;display:flex;align-items:center;gap:5px;justify-content:center;" contenteditable="true"><span style="display:inline-block;width:14px;height:2px;background:var(--accent);border-radius:2px;"></span>Getting Started Is Easy<span style="display:inline-block;width:14px;height:2px;background:var(--accent);border-radius:2px;"></span></p>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <div style="display:flex;align-items:flex-start;gap:8px;">
+                <span style="background:linear-gradient(135deg,var(--teal),var(--teal-dk));color:#fff;font-size:6.5pt;font-weight:900;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 6px rgba(13,80,128,.3);">1</span>
+                <p style="font-size:7pt;color:var(--text);line-height:1.4;margin:0;" contenteditable="true">Referral to Beyond Wound Care.</p>
+              </div>
+              <div style="display:flex;align-items:flex-start;gap:8px;">
+                <span style="background:linear-gradient(135deg,var(--teal),var(--teal-dk));color:#fff;font-size:6.5pt;font-weight:900;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 6px rgba(13,80,128,.3);">2</span>
+                <p style="font-size:7pt;color:var(--text);line-height:1.4;margin:0;" contenteditable="true"><strong>We verify</strong> your insurance &amp; confirm coverage at no cost to you.</p>
+              </div>
+              <div style="display:flex;align-items:flex-start;gap:8px;">
+                <span style="background:linear-gradient(135deg,var(--accent),var(--accent-dk));color:#fff;font-size:6.5pt;font-weight:900;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 6px rgba(244,160,28,.35);">3</span>
+                <p style="font-size:7pt;color:var(--text);line-height:1.4;margin:0;" contenteditable="true"><strong>A specialist visits</strong> your home within days — healing starts immediately.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+      </div>
+    </div>
+  </div>
+</div><!-- /page1 -->
+
+
+<!-- ══════════════════════════════════════════════════════════
+     PAGE 2 – INSIDE
+══════════════════════════════════════════════════════════ -->
+<div class="page" id="page2">
+  <span class="page-label">PAGE 2 – INSIDE &nbsp;(Wound Guide &bull; FAQ &bull; Team)</span>
+
+  <!-- Inside Left – Wound Type Guide -->
+  <div class="panel" id="panel-p2l" data-label="Wound Descriptions">
+    <div class="panel-inner">
+      <div class="sortable-zone" id="sz-p2l">
+
+        <div class="block" data-block="wd-hd">
+          <span class="drag-handle">⠇</span>
+          <div class="eyebrow">Our Services</div>
+          <h2 style="font-size:10pt;font-weight:900;color:var(--teal-dk);margin-bottom:4px;letter-spacing:.04em;" contenteditable="true">WHAT WE TREAT</h2>
+        </div>
+
+        <div class="block" data-block="wd-section-wc">
+          <span class="drag-handle">⠇</span>
+          <div style="display:flex;align-items:center;gap:5px;margin:2px 0 5px;">
+            <div style="height:2px;flex:1;background:var(--teal);border-radius:2px;"></div>
+            <span style="font-size:6pt;font-weight:900;text-transform:uppercase;letter-spacing:.13em;color:var(--teal-dk);flex-shrink:0;">Wound Care</span>
+            <div style="height:2px;flex:1;background:var(--teal);border-radius:2px;"></div>
+          </div>
+        </div>
+
+        <div class="block" data-block="wd-pressure">
+          <span class="drag-handle">⠇</span>
+          <div class="wound-card">
+            <div class="wc-icon"><svg viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="9" cy="6" r="2.5" fill="white"/><rect x="5" y="9" width="10" height="3" rx="1.5" fill="white" opacity=".8"/><rect x="2" y="12" width="22" height="3.5" rx="1.75" fill="white"/><rect x="2" y="15.5" width="22" height="2" rx="1" fill="white" opacity=".45"/></svg></div>
+            <div>
+              <div class="wc-name" contenteditable="true">Pressure Ulcers</div>
+              <div class="wc-desc" contenteditable="true">Skin breakdown from prolonged pressure; common in low-mobility patients.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="block" data-block="wd-diabetic">
+          <span class="drag-handle">⠇</span>
+          <div class="wound-card">
+            <div class="wc-icon"><svg viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10 2 L10 17 Q10 21 14 21 L19 21 Q22 21 22 18.5 L16 18.5 L16 2 Z" fill="white" opacity=".85"/><ellipse cx="10" cy="23" rx="2.5" ry="1" fill="white" opacity=".5"/><ellipse cx="14" cy="23.5" rx="2" ry=".8" fill="white" opacity=".4"/><circle cx="20" cy="8" r="3" fill="#f4a01c"/><path d="M20 6.5 L20 9.5" stroke="white" stroke-width="1.4" stroke-linecap="round"/><path d="M18.5 8 L21.5 8" stroke="white" stroke-width="1.4" stroke-linecap="round"/></svg></div>
+            <div>
+              <div class="wc-name" contenteditable="true">Diabetic Ulcers</div>
+              <div class="wc-desc" contenteditable="true">Foot &amp; leg wounds from poor circulation due to diabetes.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="block" data-block="wd-venous">
+          <span class="drag-handle">⠇</span>
+          <div class="wound-card">
+            <div class="wc-icon"><svg viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="8" y="2" width="10" height="18" rx="5" fill="white" opacity=".8"/><rect x="4" y="22" width="18" height="3" rx="1.5" fill="white" opacity=".9"/><path d="M9 8 Q11.5 11 14 8" stroke="#0d5080" stroke-width="1.2" stroke-linecap="round" fill="none"/><path d="M9 12 Q11.5 15 14 12" stroke="#0d5080" stroke-width="1.2" stroke-linecap="round" fill="none"/></svg></div>
+            <div>
+              <div class="wc-name" contenteditable="true">Venous Ulcers</div>
+              <div class="wc-desc" contenteditable="true">Open sores from blood pooling in the veins; usually on the lower legs.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="block" data-block="wd-arterial">
+          <span class="drag-handle">⠇</span>
+          <div class="wound-card">
+            <div class="wc-icon"><svg viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13 23 L4.5 13.5 Q2 9 5.5 6 Q9 3 12.5 6.5 Q13 7 13 7 Q13 7 13.5 6.5 Q17 3 20.5 6 Q24 9 21.5 13.5 Z" fill="white" opacity=".9"/><path d="M13 17 L13 24" stroke="#f4a01c" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+            <div>
+              <div class="wc-name" contenteditable="true">Arterial Ulcers</div>
+              <div class="wc-desc" contenteditable="true">Reduced blood flow to the extremities — feet, toes, and outer ankles.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="block" data-block="wd-infected">
+          <span class="drag-handle">⠇</span>
+          <div class="wound-card">
+            <div class="wc-icon"><svg viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13 2 L22 6.5 L22 14 Q22 20 13 24 Q4 20 4 14 L4 6.5 Z" fill="white" opacity=".85"/><rect x="11.5" y="8" width="3" height="10" rx="1.5" fill="#0d5080"/><rect x="7" y="11.5" width="12" height="3" rx="1.5" fill="#0d5080"/></svg></div>
+            <div>
+              <div class="wc-name" contenteditable="true">Infected Wounds</div>
+              <div class="wc-desc" contenteditable="true">Bacterial contamination blocking natural healing; requires targeted treatment.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="block" data-block="wd-chronic">
+          <span class="drag-handle">⠇</span>
+          <div class="wound-card">
+            <div class="wc-icon"><svg viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 13 L24 13" stroke="white" stroke-width="2.5" stroke-linecap="round"/><path d="M6 8 L8 13" stroke="white" stroke-width="1.4" stroke-linecap="round" opacity=".8"/><path d="M8 8 L6 13" stroke="white" stroke-width="1.4" stroke-linecap="round" opacity=".8"/><path d="M12 8 L14 13" stroke="white" stroke-width="1.4" stroke-linecap="round" opacity=".8"/><path d="M14 8 L12 13" stroke="white" stroke-width="1.4" stroke-linecap="round" opacity=".8"/><path d="M18 8 L20 13" stroke="white" stroke-width="1.4" stroke-linecap="round" opacity=".8"/><path d="M20 8 L18 13" stroke="white" stroke-width="1.4" stroke-linecap="round" opacity=".8"/><path d="M6 13 L8 18" stroke="white" stroke-width="1.4" stroke-linecap="round" opacity=".8"/><path d="M8 13 L6 18" stroke="white" stroke-width="1.4" stroke-linecap="round" opacity=".8"/><path d="M12 13 L14 18" stroke="white" stroke-width="1.4" stroke-linecap="round" opacity=".8"/><path d="M14 13 L12 18" stroke="white" stroke-width="1.4" stroke-linecap="round" opacity=".8"/><path d="M18 13 L20 18" stroke="white" stroke-width="1.4" stroke-linecap="round" opacity=".8"/><path d="M20 13 L18 18" stroke="white" stroke-width="1.4" stroke-linecap="round" opacity=".8"/></svg></div>
+            <div>
+              <div class="wc-name" contenteditable="true">Chronic &amp; Post-Surgical Wounds</div>
+              <div class="wc-desc" contenteditable="true">Non-healing wounds &gt;4 weeks or post-surgical wounds past 90 days.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="block" data-block="wd-burns">
+          <span class="drag-handle">⠇</span>
+          <div class="wound-card">
+            <div class="wc-icon"><svg viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13 2 C11 6 15 8 13 13 C12 10 9 11 9 14 C9 18.5 12.5 22 17 21 C21 20 23 16 23 13 C23 9 18 7 18 4 C17.5 8.5 14.5 11 14 10 C16 7 13 2 13 2 Z" fill="#f4a01c" opacity=".85"/><path d="M14 12 C12 15 13 17.5 15.5 18.5 C18.5 17.5 19.5 14.5 18 12.5 C18 15.5 15.5 15.5 15.5 12.5 C15.5 11 14 12 14 12 Z" fill="white" opacity=".8"/></svg></div>
+            <div>
+              <div class="wc-name" contenteditable="true">Burns &amp; Traumatic Wounds</div>
+              <div class="wc-desc" contenteditable="true">Heat, chemical, or trauma injuries needing specialized protocols.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Internal Medicine section divider ── -->
+        <div class="block" data-block="im-section-hd">
+          <span class="drag-handle">⠇</span>
+          <div style="display:flex;align-items:center;gap:5px;margin:5px 0 5px;">
+            <div style="height:2px;flex:1;background:var(--accent);border-radius:2px;"></div>
+            <span style="font-size:6pt;font-weight:900;text-transform:uppercase;letter-spacing:.13em;color:var(--teal-dk);flex-shrink:0;">Internal Medicine</span>
+            <div style="height:2px;flex:1;background:var(--accent);border-radius:2px;"></div>
+          </div>
+          <div style="background:linear-gradient(to right,rgba(244,160,28,.09),rgba(244,160,28,.02));border-radius:6px;padding:6px 9px;border-left:3px solid var(--accent);margin-bottom:5px;">
+            <div style="font-size:6.5pt;font-weight:900;color:var(--accent-dk);text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px;">Medical Services</div>
+            <p style="font-size:6pt;color:var(--text);line-height:1.45;margin:0;" contenteditable="true">Primarily serves <strong>homebound individuals</strong> needing care, including <strong>geriatric &amp; long-term care</strong> patients. Comprehensive history reviews, physical exams, and chronic disease management.</p>
+          </div>
+        </div>
+
+        <div class="block" data-block="im-chronic">
+          <span class="drag-handle">⠇</span>
+          <div class="wound-card im-card">
+            <div class="wc-icon"><svg viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="13" cy="13" r="8.5" stroke="white" stroke-width="2" fill="none" opacity=".85"/><path d="M13 7.5 L13 13.5 L17 16" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M7.5 3.5 C7.5 3.5 2.5 6.5 2.5 13" stroke="white" stroke-width="1.4" stroke-linecap="round" fill="none" opacity=".55"/><path d="M5 1.5 L7.5 3.5 L5.5 6" stroke="white" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity=".55"/></svg></div>
+            <div>
+              <div class="wc-name" contenteditable="true">Chronic Care Management</div>
+              <div class="wc-desc" contenteditable="true">Long-term condition monitoring to prevent complications.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="block" data-block="im-diabetes">
+          <span class="drag-handle">⠇</span>
+          <div class="wound-card im-card">
+            <div class="wc-icon"><svg viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13 4 C11 7 6 11 6 15 a7 7 0 0 0 14 0 C20 11 15 7 13 4z" fill="white" opacity=".85"/><rect x="11.5" y="12" width="3" height="7" rx="1.5" fill="#0d5080"/><rect x="8.5" y="14.5" width="9" height="3" rx="1.5" fill="#0d5080"/></svg></div>
+            <div>
+              <div class="wc-name" contenteditable="true">Diabetes</div>
+              <div class="wc-desc" contenteditable="true">Blood sugar control &amp; medication management for Type 1 &amp; 2.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="block" data-block="im-hypertension">
+          <span class="drag-handle">⠇</span>
+          <div class="wound-card im-card">
+            <div class="wc-icon"><svg viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13 22 L4.5 13.5 Q2 9 5.5 6 Q9 3 12.5 6.5 Q13 7 13 7 Q13 7 13.5 6.5 Q17 3 20.5 6 Q24 9 21.5 13.5 Z" fill="white" opacity=".85"/><path d="M13 16 L13 10 M10.5 12.5 L13 10 L15.5 12.5" stroke="#0d5080" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></div>
+            <div>
+              <div class="wc-name" contenteditable="true">Hypertension</div>
+              <div class="wc-desc" contenteditable="true">BP monitoring &amp; treatment to reduce stroke and heart attack risk.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="block" data-block="im-heart">
+          <span class="drag-handle">⠇</span>
+          <div class="wound-card im-card">
+            <div class="wc-icon"><svg viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13 21 L5 13 Q2 9 5.5 6 Q9 3 12.5 6.5 Q13 7 13 7 Q13.5 6.5 17 3 Q20.5 1 23.5 5 Q26 8 23 12 Z" fill="white" opacity=".8"/><path d="M3 13.5 L7 13.5 L9 9.5 L12 17.5 L15 10.5 L17 13.5 L23 13.5" stroke="#f4a01c" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></div>
+            <div>
+              <div class="wc-name" contenteditable="true">Heart Disease</div>
+              <div class="wc-desc" contenteditable="true">Medication review, lifestyle guidance &amp; specialist collaboration.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="block" data-block="im-pulmonary">
+          <span class="drag-handle">⠇</span>
+          <div class="wound-card im-card">
+            <div class="wc-icon"><svg viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13 3 L13 11" stroke="white" stroke-width="2" stroke-linecap="round"/><path d="M13 8 C13 8 7 8 5 11 C3 14 4 18 6 20 C8 22 10 22 11 20 L11 13" stroke="white" stroke-width="1.8" stroke-linecap="round" fill="none" opacity=".9"/><path d="M13 8 C13 8 19 8 21 11 C23 14 22 18 20 20 C18 22 16 22 15 20 L15 13" stroke="white" stroke-width="1.8" stroke-linecap="round" fill="none" opacity=".9"/><ellipse cx="8.5" cy="17" rx="2" ry="2.5" fill="white" opacity=".6"/><ellipse cx="17.5" cy="17" rx="2" ry="2.5" fill="white" opacity=".6"/></svg></div>
+            <div>
+              <div class="wc-name" contenteditable="true">Pulmonary Disorders</div>
+              <div class="wc-desc" contenteditable="true">COPD, asthma &amp; respiratory care to improve breathing &amp; function.</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Inside Center – FAQ -->
+  <div class="panel bg-teal-dk" id="panel-p2m" data-label="FAQ">
+    <div class="panel-inner">
+      <div class="sortable-zone" id="sz-p2m">
+
+        <!-- Medical team photo banner -->
+        <div class="block" data-block="faq-photo">
+          <span class="drag-handle">⠇</span>
+          <div style="position:relative;border-radius:8px;overflow:hidden;margin-bottom:8px;box-shadow:0 3px 10px rgba(0,0,0,.25);">
+            <img src="assets/img/medical-team.jpg" alt="Beyond Wound Care medical team" style="width:100%;height:110px;object-fit:cover;object-position:center 35%;display:block;">
+            <div style="position:absolute;inset:0;background:linear-gradient(to right,rgba(13,80,128,.7),rgba(13,80,128,.2));display:flex;align-items:center;padding:0 10px;">
+              <span style="color:#fff;font-size:7pt;font-weight:800;font-family:'Montserrat',sans-serif;letter-spacing:.03em;">Expert. Compassionate. At Home.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="block" data-block="faq-hd">
+          <span class="drag-handle">⠇</span>
+          <div class="eyebrow center" style="justify-content:center;">Common Questions</div>
+          <h2 style="font-size:11pt;font-weight:900;color:var(--white);text-align:center;margin-bottom:6px;letter-spacing:.04em;" contenteditable="true">FREQUENTLY ASKED QUESTIONS</h2>
+        </div>
+
+        <!-- By the Numbers infographic -->
+        <div class="block" data-block="faq-stats">
+          <span class="drag-handle">⠇</span>
+          <div class="stats-row">
+            <div class="stat-bubble">
+              <div class="stat-num">1000+</div>
+              <div class="stat-lbl">Patients Served</div>
+            </div>
+            <div class="stat-bubble">
+              <div class="stat-num">10</div>
+              <div class="stat-lbl">Counties</div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="block" data-block="faq-1">
+          <span class="drag-handle">⠇</span>
+          <div class="faq-item">
+            <div class="faq-q" contenteditable="true">Do I Need a Referral?</div>
+            <div class="faq-a" contenteditable="true">Most insurance plans require a physician referral. We can assist you in obtaining one — just contact our office.</div>
+          </div>
+        </div>
+
+        <div class="block" data-block="faq-2">
+          <span class="drag-handle">⠇</span>
+          <div class="faq-item">
+            <div class="faq-q" contenteditable="true">Is This Covered By Insurance?</div>
+            <div class="faq-a" contenteditable="true">We accept Medicare, United Health Care PPO, and Blue Cross Blue Shield - PPO. We handle all billing on your behalf.</div>
+          </div>
+        </div>
+
+        <div class="block" data-block="faq-3">
+          <span class="drag-handle">⠇</span>
+          <div class="faq-item">
+            <div class="faq-q" contenteditable="true">How Quickly Can You See Me?</div>
+            <div class="faq-a" contenteditable="true">We aim to schedule your first home visit within 24–72 hours of insurance approval and referral receipt.</div>
+          </div>
+        </div>
+
+        <div class="block" data-block="faq-4">
+          <span class="drag-handle">⠇</span>
+          <div class="faq-item">
+            <div class="faq-q" contenteditable="true">What Safety Protocols Do You Follow?</div>
+            <div class="faq-a" contenteditable="true">Our clinicians follow CDC guidelines during all home visits to keep you and your family safe.</div>
+          </div>
+        </div>
+
+        <!-- ── Getting Started timeline ── -->
+        <div class="block" data-block="faq-timeline">
+          <span class="drag-handle">⠇</span>
+          <div style="margin-bottom:4px;margin-top:10px;">
+            <div class="eyebrow center" style="justify-content:center;margin-bottom:9px;">How It Works</div>
+            <div style="display:flex;align-items:flex-start;gap:0;position:relative;">
+              <!-- connecting line -->
+              <div style="position:absolute;top:14px;left:calc(16.5% - 0px);right:calc(16.5%);height:2px;background:rgba(244,160,28,.45);z-index:0;"></div>
+              <!-- Step 1 -->
+              <div style="flex:1;text-align:center;position:relative;z-index:1;">
+                <div style="width:28px;height:28px;border-radius:50%;background:var(--accent);margin:0 auto 5px;display:flex;align-items:center;justify-content:center;font-family:'Montserrat',sans-serif;font-size:9pt;font-weight:900;color:#fff;box-shadow:0 2px 8px rgba(244,160,28,.45);">1</div>
+                <div style="font-family:'Montserrat',sans-serif;font-size:8pt;font-weight:800;color:#fff;line-height:1.3;" contenteditable="true">Referral</div>
+                <div style="font-size:7pt;color:rgba(255,255,255,.65);margin-top:3px;line-height:1.3;" contenteditable="true">Home health &amp; clinics sends referral &amp; wound notes</div>
+              </div>
+              <!-- Step 2 -->
+              <div style="flex:1;text-align:center;position:relative;z-index:1;">
+                <div style="width:28px;height:28px;border-radius:50%;background:var(--teal);border:2px solid var(--accent);margin:0 auto 5px;display:flex;align-items:center;justify-content:center;font-family:'Montserrat',sans-serif;font-size:9pt;font-weight:900;color:#fff;box-shadow:0 2px 8px rgba(26,111,163,.4);">2</div>
+                <div style="font-family:'Montserrat',sans-serif;font-size:8pt;font-weight:800;color:#fff;line-height:1.3;" contenteditable="true">We Verify</div>
+                <div style="font-size:7pt;color:rgba(255,255,255,.65);margin-top:3px;line-height:1.3;" contenteditable="true">Insurance handled by us</div>
+              </div>
+              <!-- Step 3 -->
+              <div style="flex:1;text-align:center;position:relative;z-index:1;">
+                <div style="width:28px;height:28px;border-radius:50%;background:var(--teal);border:2px solid var(--accent);margin:0 auto 5px;display:flex;align-items:center;justify-content:center;font-family:'Montserrat',sans-serif;font-size:9pt;font-weight:900;color:#fff;box-shadow:0 2px 8px rgba(26,111,163,.4);">3</div>
+                <div style="font-family:'Montserrat',sans-serif;font-size:8pt;font-weight:800;color:#fff;line-height:1.3;" contenteditable="true">Care Begins</div>
+                <div style="font-size:7pt;color:rgba(255,255,255,.65);margin-top:3px;line-height:1.3;" contenteditable="true">Visit within 24–72 hrs</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="block" data-block="faq-cta">
+          <span class="drag-handle">⠇</span>
+          <p style="color:rgba(255,255,255,.85);font-size:8.5pt;text-align:center;line-height:1.5;margin-top:8px;" contenteditable="true">Have more questions? Please call us.<br><strong style="color:var(--accent);font-size:11pt;">847.873.8693</strong></p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Inside Right – Our Wound Care Team -->
+  <div class="panel" id="panel-p2r" data-label="Outside Middle">
+    <div class="panel-inner">
+      <div class="sortable-zone" id="sz-p2r">
+
+        <!-- Photo banner with overlay -->
+        <div class="block" data-block="om-photo">
+          <span class="drag-handle">⠿</span>
+          <div style="position:relative;border-radius:9px;overflow:hidden;box-shadow:0 4px 16px rgba(13,80,128,.28);margin-bottom:8px;">
+            <img src="assets/img/wound-banner.jpg" alt="Wound care specialist treating patient" style="width:100%;height:140px;object-fit:cover;object-position:center 30%;display:block;">
+            <div style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(13,80,128,.18) 0%,rgba(13,80,128,.72) 100%);display:flex;align-items:flex-end;padding:8px 12px;">
+              <div style="display:flex;align-items:center;gap:7px;width:100%;">
+                <div style="background:var(--accent);width:3px;height:28px;border-radius:2px;flex-shrink:0;"></div>
+                <div>
+                  <div style="font-family:'Montserrat',sans-serif;font-size:9.5pt;font-weight:900;color:#fff;line-height:1.15;text-shadow:0 1px 4px rgba(0,0,0,.4);" contenteditable="true">Beyond Wound Care Inc.</div>
+                  <div style="font-size:6pt;color:rgba(255,255,255,.85);font-weight:600;text-transform:uppercase;letter-spacing:.12em;margin-top:2px;" contenteditable="true">Home · Facility · Assisted Living</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Contact card -->
+        <div class="block" data-block="om-contact">
+          <span class="drag-handle">⠿</span>
+          <div style="background:linear-gradient(135deg,var(--teal-dk) 0%,#0a3f65 100%);border-radius:9px;padding:9px 12px;box-shadow:0 3px 14px rgba(13,80,128,.3);border:1px solid rgba(255,255,255,.08);">
+            <div style="display:flex;flex-direction:column;gap:5px;">
+              <div style="display:flex;align-items:flex-start;gap:7px;">
+                <span style="font-size:9.5pt;flex-shrink:0;margin-top:1px;">&#128205;</span>
+                <span style="font-size:7pt;color:rgba(255,255,255,.9);line-height:1.45;font-weight:500;" contenteditable="true">1340 Remington Rd. Suite P<br>Schaumburg, IL 60173</span>
+              </div>
+              <div style="height:1px;background:rgba(255,255,255,.12);margin:1px 0;"></div>
+              <div style="display:flex;align-items:center;gap:7px;">
+                <span style="font-size:9.5pt;flex-shrink:0;">&#128222;</span>
+                <span style="font-size:8pt;color:var(--accent);font-weight:800;font-family:'Montserrat',sans-serif;letter-spacing:.02em;" contenteditable="true">847.873.8693</span>
+                <span style="font-size:6.5pt;color:rgba(255,255,255,.55);margin-left:2px;" contenteditable="true">Fax: 847.873.8486</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:7px;">
+                <span style="font-size:9.5pt;flex-shrink:0;">&#9993;</span>
+                <span style="font-size:7pt;color:rgba(255,255,255,.85);font-weight:500;" contenteditable="true">support@beyondwoundcare.com</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:7px;">
+                <span style="font-size:9.5pt;flex-shrink:0;">&#127760;</span>
+                <span style="font-size:7pt;color:rgba(255,255,255,.85);font-weight:700;letter-spacing:.01em;" contenteditable="true">www.beyondwoundcare.com</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- County service area -->
+        <div class="block mt-sm" data-block="om-counties">
+          <span class="drag-handle">⠿</span>
+          <div style="background:linear-gradient(135deg,var(--teal-lt),#f4f9ff);border:1px solid rgba(26,111,163,.22);border-radius:9px;padding:8px 10px;box-shadow:0 2px 8px rgba(13,80,128,.09);">
+            <div style="display:flex;align-items:center;gap:5px;margin-bottom:7px;">
+              <div style="width:3px;height:18px;background:linear-gradient(to bottom,var(--teal),var(--teal-dk));border-radius:2px;flex-shrink:0;"></div>
+              <span style="font-size:6.5pt;font-weight:900;color:var(--teal-dk);text-transform:uppercase;letter-spacing:.1em;">Service Area</span>
+              <span style="margin-left:auto;background:var(--teal-dk);color:#fff;font-size:6pt;font-weight:800;padding:2px 7px;border-radius:10px;font-family:'Montserrat',sans-serif;">10 Counties</span>
+            </div>
+            <div style="display:flex;gap:8px;align-items:flex-start;">
+              <svg viewBox="0 0 66 98" xmlns="http://www.w3.org/2000/svg" width="46" height="68" style="flex-shrink:0;filter:drop-shadow(0 2px 4px rgba(13,80,128,.15));">
+                <path d="M31,2 L49,2 L54,9 L54,44 L59,50 L54,61 L49,77 L41,92 L37,97 L31,97 L26,93 L21,79 L11,53 L6,39 L6,21 L12,9 Z" fill="#d6eaf8" stroke="#1a6fa3" stroke-width="1.5"/>
+                <circle cx="50" cy="13" r="4.2" fill="#f4a01c"/><circle cx="49" cy="23" r="5.2" fill="#0d5080"/>
+                <circle cx="39" cy="12" r="3.2" fill="#1a6fa3"/><circle cx="40" cy="23" r="3.2" fill="#1a6fa3"/>
+                <circle cx="32" cy="25" r="3.2" fill="#1a6fa3"/><circle cx="43" cy="37" r="3.2" fill="#1a6fa3"/>
+                <circle cx="32" cy="37" r="3" fill="#3a9ad4"/><circle cx="31" cy="13" r="3" fill="#3a9ad4"/>
+                <circle cx="21" cy="18" r="3" fill="#3a9ad4"/><circle cx="12" cy="16" r="2.7" fill="#3a9ad4"/>
+              </svg>
+              <div class="county-pill-grid" style="flex:1;margin-top:2px;">
+                <span class="county-pill" contenteditable="true">Cook</span>
+                <span class="county-pill" contenteditable="true">DuPage</span>
+                <span class="county-pill" contenteditable="true">Lake</span>
+                <span class="county-pill" contenteditable="true">Will</span>
+                <span class="county-pill" contenteditable="true">McHenry</span>
+                <span class="county-pill" contenteditable="true">Kane</span>
+                <span class="county-pill" contenteditable="true">Kendall</span>
+                <span class="county-pill" contenteditable="true">Boone</span>
+                <span class="county-pill" contenteditable="true">Winnebago</span>
+                <span class="county-pill" contenteditable="true">Stephenson</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Why Choose Us -->
+        <div class="block mt-sm" data-block="om-why">
+          <span class="drag-handle">⠿</span>
+          <div class="eyebrow" style="margin-bottom:8px;"><span></span>Why Choose Us?</div>
+          <div style="display:flex;flex-direction:column;gap:7px;">
+            <div style="display:flex;align-items:flex-start;gap:7px;background:linear-gradient(to right,rgba(26,111,163,.07),transparent);border-radius:6px;padding:7px 8px;border-left:3px solid var(--teal);">
+              <span style="font-size:11pt;flex-shrink:0;line-height:1;">&#127968;</span>
+              <span style="font-size:7pt;color:var(--text);font-weight:500;line-height:1.4;" contenteditable="true">Specialized <strong>wound care and chronic care</strong> conditions</span>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:7px;background:linear-gradient(to right,rgba(26,111,163,.07),transparent);border-radius:6px;padding:7px 8px;border-left:3px solid var(--teal);">
+              <span style="font-size:11pt;flex-shrink:0;line-height:1;">&#9989;</span>
+              <span style="font-size:7pt;color:var(--text);font-weight:500;line-height:1.4;" contenteditable="true">Covered by <strong>Medicare &amp; most major insurances</strong></span>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:7px;background:linear-gradient(to right,rgba(26,111,163,.07),transparent);border-radius:6px;padding:7px 8px;border-left:3px solid var(--teal);">
+              <span style="font-size:11pt;flex-shrink:0;line-height:1;">&#128105;&#8205;&#9877;&#65039;</span>
+              <span style="font-size:7pt;color:var(--text);font-weight:500;line-height:1.4;" contenteditable="true"><strong>Board certified medical doctors and nurse practitioners</strong> on staff</span>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:7px;background:linear-gradient(to right,rgba(244,160,28,.09),rgba(244,160,28,.02));border-radius:6px;padding:7px 8px;border-left:3px solid var(--accent);">
+              <span style="font-size:11pt;flex-shrink:0;line-height:1;">&#9889;</span>
+              <span style="font-size:7pt;color:var(--text);font-weight:500;line-height:1.4;" contenteditable="true"><strong>Fast scheduling</strong> — seen within days of referral</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Availability -->
+        <div class="block mt-sm" data-block="om-hours">
+          <span class="drag-handle">⠿</span>
+          <div style="background:linear-gradient(135deg,var(--teal-dk),#0a3f65);border-radius:9px;padding:11px 12px;box-shadow:0 3px 12px rgba(13,80,128,.25);">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:9px;border-bottom:1px solid rgba(255,255,255,.15);padding-bottom:8px;">
+              <span style="font-size:12pt;">&#128336;</span>
+              <span style="font-size:7pt;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:.1em;font-family:'Montserrat',sans-serif;" contenteditable="true">Office Hours</span>
+
+            </div>
+            <div style="display:flex;flex-direction:column;gap:9px;">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+                <span style="font-size:7pt;font-weight:700;color:rgba(255,255,255,.7);min-width:52px;" contenteditable="true">Office Hrs : Mon – Fri</span>
+                <span style="flex:1;height:1px;background:rgba(255,255,255,.15);"></span>
+                <span style="font-size:7pt;font-weight:800;color:#fff;" contenteditable="true">8:00 AM – 5:00 PM</span>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div><!-- /page2 -->
+
+</div><!-- /brochure-canvas -->
+
+
+<!-- ══════════════════════════════════════════════════════════
+     JAVASCRIPT EDITOR ENGINE
+══════════════════════════════════════════════════════════ -->
+<script>
+'use strict';
+
+/* ── State ── */
+let selectedBlock = null;
+let undoStack     = [];
+let redoStack     = [];
+let isEditMode    = true;
+
+/* ── Snapshot for Undo/Redo ── */
+function snapshot() {
+  const s = document.getElementById('page1').innerHTML + '||' + document.getElementById('page2').innerHTML;
+  if (undoStack.length && undoStack[undoStack.length-1] === s) return;
+  undoStack.push(s);
+  if (undoStack.length > 80) undoStack.shift();
+  redoStack = [];
+}
+function restoreSnap(s) {
+  const [p1,p2] = s.split('||');
+  document.getElementById('page1').innerHTML = p1;
+  document.getElementById('page2').innerHTML = p2;
+  initSortables(); rebindBlocks(); selectBlock(null);
+}
+function undoAction() { if (undoStack.length<2) return; redoStack.push(undoStack.pop()); restoreSnap(undoStack[undoStack.length-1]); }
+function redoAction() { if (!redoStack.length) return; const s=redoStack.pop(); undoStack.push(s); restoreSnap(s); }
+
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey||e.metaKey) && e.key==='z' && !e.shiftKey) { e.preventDefault(); undoAction(); }
+  if ((e.ctrlKey||e.metaKey) && (e.key==='y'||(e.key==='z'&&e.shiftKey))) { e.preventDefault(); redoAction(); }
+  if ((e.ctrlKey||e.metaKey) && e.key==='s') { e.preventDefault(); saveHTML(); }
+  if ((e.ctrlKey||e.metaKey) && (e.key==='='||e.key==='+')) { e.preventDefault(); zoomIn(); }
+  if ((e.ctrlKey||e.metaKey) && e.key==='-') { e.preventDefault(); zoomOut(); }
+  if ((e.ctrlKey||e.metaKey) && e.key==='0') { e.preventDefault(); zoomFit(); }
+  if (e.key==='Escape') {
+    selectBlock(null);
+    document.getElementById('add-block-menu').classList.remove('open');
+    document.getElementById('shortcuts-modal').classList.remove('open');
+  }
+});
+
+/* ── Sortable Init ── */
+const sortableInst = [];
+function initSortables() {
+  sortableInst.forEach(s=>s.destroy()); sortableInst.length=0;
+  document.querySelectorAll('.sortable-zone').forEach(zone=>{
+    sortableInst.push(Sortable.create(zone,{
+      group:'brochure', handle:'.drag-handle', animation:160,
+      ghostClass:'sortable-ghost', dragClass:'sortable-drag', chosenClass:'sortable-chosen',
+      onStart(){ snapshot(); },
+      onEnd(){ rebindBlocks(); }
+    }));
+  });
+}
+
+/* ── Block Selection ── */
+function rebindBlocks() {
+  document.querySelectorAll('.block').forEach(b=>{
+    b.replaceWith(b.cloneNode(true)); // remove old listeners
+  });
+  document.querySelectorAll('.block').forEach(b=>{
+    b.addEventListener('click', function(e){
+      if (!isEditMode) return;
+      e.stopPropagation();
+      selectBlock(this);
+    });
+  });
+}
+
+function selectBlock(block) {
+  document.querySelectorAll('.block.selected').forEach(b=>b.classList.remove('selected'));
+  selectedBlock = block;
+  const tb = document.getElementById('block-toolbar');
+  if (!block || !isEditMode) { tb.classList.remove('visible'); return; }
+  block.classList.add('selected');
+  positionToolbar(block);
+}
+
+function positionToolbar(block) {
+  const tb = document.getElementById('block-toolbar');
+  tb.classList.add('visible');
+  const r = block.getBoundingClientRect();
+  let left = Math.max(8, Math.min(r.left, window.innerWidth - 560));
+  let top  = r.top - 52;
+  if (top < 62) top = r.bottom + 6;
+  if (top + 100 > window.innerHeight) top = r.top - 52;
+  tb.style.left = left+'px';
+  tb.style.top  = top+'px';
+  const bg = block.style.background || getComputedStyle(block).backgroundColor;
+  document.getElementById('bt-bgcolor').value = cssColorToHex(bg);
+}
+
+function cssColorToHex(c) {
+  // handle rgba/rgb
+  const m = (c||'').match(/\d+/g);
+  if (!m||m.length<3) return '#ffffff';
+  return '#'+[m[0],m[1],m[2]].map(x=>(+x).toString(16).padStart(2,'0')).join('');
+}
+
+/* ── Block Actions ── */
+function moveBlock(dir) {
+  if (!selectedBlock) return; snapshot();
+  const z=selectedBlock.parentElement;
+  const bs=[...z.children].filter(c=>c.classList.contains('block'));
+  const i=bs.indexOf(selectedBlock);
+  if (dir==='up'&&i>0) z.insertBefore(selectedBlock,bs[i-1]);
+  if (dir==='dn'&&i<bs.length-1) bs[i+1].after(selectedBlock);
+  positionToolbar(selectedBlock);
+}
+function deleteBlock() {
+  if (!selectedBlock||!confirm('Delete this block?')) return; snapshot();
+  selectedBlock.remove(); selectBlock(null);
+}
+function duplicateBlock() {
+  if (!selectedBlock) return; snapshot();
+  const cl=selectedBlock.cloneNode(true);
+  selectedBlock.after(cl); rebindBlocks();
+  selectBlock(cl);
+}
+function fmt(cmd) { snapshot(); document.execCommand(cmd,false,null); }
+function changeFontSize(d) {
+  if (!selectedBlock) return; snapshot();
+  selectedBlock.querySelectorAll('[contenteditable]').forEach(el=>{
+    const cur=parseFloat(getComputedStyle(el).fontSize)||9;
+    el.style.fontSize=(cur+d)+'px';
+  });
+}
+function applyTextColor(v) { if (!selectedBlock) return; snapshot(); selectedBlock.querySelectorAll('[contenteditable]').forEach(el=>el.style.color=v); }
+function applyBlockBg(v)   { if (!selectedBlock) return; snapshot(); selectedBlock.style.background=v; }
+
+/* ── Add Block Menu ── */
+function openAddMenu() {
+  const menu=document.getElementById('add-block-menu');
+  const tb=document.getElementById('block-toolbar').getBoundingClientRect();
+  menu.style.left=tb.left+'px'; menu.style.top=(tb.bottom+4)+'px';
+  menu.classList.toggle('open');
+}
+document.addEventListener('click', e=>{
+  const m=document.getElementById('add-block-menu');
+  if (!m.contains(e.target)&&!e.target.closest('#block-toolbar')) m.classList.remove('open');
+});
+
+const BLOCK_TEMPLATES = {
+  heading:  `<div class="block mt-sm" data-block="new"><span class="drag-handle">⠿</span><div class="section-title" contenteditable="true">New Heading</div></div>`,
+  text:     `<div class="block mt-sm" data-block="new"><span class="drag-handle">⠿</span><p contenteditable="true" data-placeholder="Enter text...">Enter your text here.</p></div>`,
+  list:     `<div class="block mt-sm" data-block="new"><span class="drag-handle">⠿</span><ul class="list" contenteditable="true"><li>Item one</li><li>Item two</li><li>Item three</li></ul></div>`,
+  divider:  `<div class="block" data-block="new"><span class="drag-handle">⠿</span><hr class="divider" style="margin:0.1in 0;"></div>`,
+  quote:    `<div class="block mt-sm" data-block="new"><span class="drag-handle">⠿</span><div class="quote-block"><span contenteditable="true">"Enter a testimonial or quote here."</span><div class="quote-author" contenteditable="true">— Name</div></div></div>`,
+  cta:      `<div class="block mt-sm" data-block="new" style="background:var(--teal);color:var(--white);border-radius:6px;padding:12px;text-align:center;"><span class="drag-handle">⠿</span><p style="font-weight:700;font-size:10pt;color:var(--accent);" contenteditable="true">Your Call To Action</p><p style="font-size:8pt;margin-top:4px;" contenteditable="true">Supporting text. Click to edit.</p></div>`,
+  contact:  `<div class="block mt-sm" data-block="new"><span class="drag-handle">⠿</span><div class="info-row"><span class="info-icon">📞</span><span contenteditable="true">Phone number or info here</span></div></div>`,
+  'tag-row':`<div class="block mt-sm" data-block="new"><span class="drag-handle">⠿</span><div contenteditable="true"><span class="tag">Tag One</span><span class="tag">Tag Two</span><span class="tag">Tag Three</span></div></div>`,
+  image:    `<div class="block mt-sm" data-block="new" style="text-align:center;"><span class="drag-handle">⠿</span><div class="img-upload-placeholder" onclick="triggerImageUpload(this)" style="border:2px dashed var(--teal);border-radius:6px;padding:18px;cursor:pointer;color:var(--teal);font-size:8.5pt;">🖼 Click to upload image<br><span style="font-size:7.5pt;color:var(--muted);">JPG, PNG, GIF, SVG supported</span></div><input type="file" accept="image/*" style="display:none" onchange="embedImage(this)"></div>`,
+  spacer:   `<div class="block" data-block="new" style="height:24px;"><span class="drag-handle">⠿</span></div>`
+};
+function addBlock(type) {
+  document.getElementById('add-block-menu').classList.remove('open');
+  if (!selectedBlock) return; snapshot();
+  const tmp=document.createElement('div');
+  tmp.innerHTML=BLOCK_TEMPLATES[type]||BLOCK_TEMPLATES.text;
+  const nb=tmp.firstElementChild;
+  selectedBlock.after(nb); rebindBlocks(); selectBlock(nb);
+}
+
+/* ── Text Alignment ── */
+function alignBlock(dir) {
+  if (!selectedBlock) return; snapshot();
+  selectedBlock.style.textAlign = dir;
+  selectedBlock.querySelectorAll('[contenteditable]').forEach(el => el.style.textAlign = dir);
+  ['bt-al','bt-ac','bt-ar'].forEach(id => document.getElementById(id).classList.remove('align-active'));
+  const map = {left:'bt-al',center:'bt-ac',right:'bt-ar'};
+  if (map[dir]) document.getElementById(map[dir]).classList.add('align-active');
+}
+
+/* ── Image Upload ── */
+function triggerImageUpload(placeholder) {
+  const input = placeholder.parentElement.querySelector('input[type=file]');
+  if (input) input.click();
+}
+function embedImage(input) {
+  if (!input.files || !input.files[0]) return;
+  snapshot();
+  const reader = new FileReader();
+  reader.onload = e => {
+    const placeholder = input.parentElement.querySelector('.img-upload-placeholder');
+    if (placeholder) {
+      const img = document.createElement('img');
+      img.src = e.target.result;
+      img.style.cssText = 'max-width:100%;border-radius:4px;display:block;margin:0 auto;';
+      img.setAttribute('contenteditable','false');
+      placeholder.replaceWith(img);
+    }
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+/* ── Zoom ── */
+let currentZoom = 0.75;
+function setZoom(v) {
+  currentZoom = Math.min(1.2, Math.max(0.3, v));
+  document.getElementById('brochure-canvas').style.transform = `scale(${currentZoom})`;
+  const pct = Math.round(currentZoom*100)+'%';
+  document.getElementById('zoom-label').textContent = pct;
+  const sr = document.getElementById('sb-zoom-range');
+  const sl = document.getElementById('sb-zoom-lbl');
+  if (sr) sr.value = Math.round(currentZoom*100);
+  if (sl) sl.textContent = pct;
+  // Adjust canvas wrapper height so page doesn't overlap footer
+  const canvas = document.getElementById('brochure-canvas');
+  const naturalH = canvas.scrollHeight / currentZoom;
+  canvas.style.marginBottom = `-${naturalH*(1-currentZoom)*0.5}px`;
+}
+function zoomIn()  { setZoom(currentZoom + 0.1); }
+function zoomOut() { setZoom(currentZoom - 0.1); }
+
+function printBrochure() {
+  const wasEdit = document.body.classList.contains('edit-mode');
+  if (wasEdit) setMode('preview');
+  const savedZoom = currentZoom;
+  // Reset transform so print CSS gets clean layout
+  const canvas = document.getElementById('brochure-canvas');
+  canvas.style.transform = 'none';
+  canvas.style.marginBottom = '0';
+  setTimeout(() => {
+    window.print();
+    // Restore zoom after print dialog closes
+    setTimeout(() => {
+      canvas.style.transform = `scale(${savedZoom})`;
+      setZoom(savedZoom);
+      if (wasEdit) setMode('edit');
+    }, 500);
+  }, 100);
+}
+function zoomFit() {
+  const available = window.innerWidth - (document.body.classList.contains('sidebar-open') ? 230 : 0) - 40;
+  const pageW = 11 * 96; // 11in at 96dpi
+  setZoom(Math.min(1, available / pageW));
+}
+
+/* ── Auto-Save ── */
+const AS_KEY = 'beyondBrochureAutosave';
+function autoSave() {
+  try {
+    const data = {
+      p1: document.getElementById('page1').innerHTML,
+      p2: document.getElementById('page2').innerHTML,
+      ts: Date.now()
+    };
+    localStorage.setItem(AS_KEY, JSON.stringify(data));
+    showAutoSaveToast();
+    const st = document.getElementById('autosave-status');
+    if (st) st.textContent = 'Last save: ' + new Date().toLocaleTimeString();
+  } catch(e) { console.warn('Auto-save failed', e); }
+}
+function loadAutoSave() {
+  try {
+    const raw = localStorage.getItem(AS_KEY);
+    if (!raw) { alert('No auto-save data found.'); return; }
+    const data = JSON.parse(raw);
+    if (!confirm('Restore auto-save from ' + new Date(data.ts).toLocaleString() + '?')) return;
+    document.getElementById('page1').innerHTML = data.p1;
+    document.getElementById('page2').innerHTML = data.p2;
+    initSortables(); rebindBlocks(); selectBlock(null);
+    snapshot();
+  } catch(e) { alert('Could not restore save: ' + e.message); }
+}
+function clearAutoSave() {
+  if (!confirm('Clear all auto-saved data?')) return;
+  localStorage.removeItem(AS_KEY);
+  const st = document.getElementById('autosave-status');
+  if (st) st.textContent = 'No saved data.';
+}
+let asToastTimer;
+function showAutoSaveToast() {
+  const t = document.getElementById('autosave-toast');
+  t.classList.add('show');
+  clearTimeout(asToastTimer);
+  asToastTimer = setTimeout(()=>t.classList.remove('show'), 2000);
+}
+
+/* ── Edit / Preview Mode ── */
+function setMode(mode) {
+  isEditMode=(mode==='edit');
+  document.body.classList.toggle('edit-mode', isEditMode);
+  document.body.classList.toggle('print-mode', !isEditMode);
+  document.getElementById('btn-edit').classList.toggle('active', isEditMode);
+  document.getElementById('btn-preview').classList.toggle('active', !isEditMode);
+  if (!isEditMode) { selectBlock(null); }
+}
+
+/* ── Sidebar ── */
+function toggleSidebar() {
+  const sb=document.getElementById('sidebar');
+  const open=sb.classList.toggle('open');
+  document.body.classList.toggle('sidebar-open', open);
+  document.getElementById('btn-sidebar').classList.toggle('active', open);
+}
+function setCssVar(name, value) {
+  document.documentElement.style.setProperty(name, value);
+  updatePanelColorList();
+}
+function setFont(v) {
+  document.querySelectorAll('.panel-inner, .panel-inner *:not(input):not(select):not(button)').forEach(el=>el.style.fontFamily=v);
+}
+function setBaseSize(v) { document.getElementById('sz-label').textContent=v+'pt'; document.querySelectorAll('.page').forEach(p=>p.style.fontSize=v+'pt'); }
+function setLineHeight(v) { document.getElementById('lh-label').textContent=v.toFixed(2); document.querySelectorAll('.page').forEach(p=>p.style.lineHeight=v); }
+
+/* Panel color list */
+const PANELS=[
+  {id:'panel-p1l',label:'Back Cover'},
+  {id:'panel-p1m',label:'Outside Mid'},
+  {id:'panel-p1r',label:'Front Cover'},
+  {id:'panel-p2l',label:'Inside Left'},
+  {id:'panel-p2m',label:'Inside Center'},
+  {id:'panel-p2r',label:'Inside Right'},
+];
+function updatePanelColorList() {
+  const c=document.getElementById('panel-color-list'); c.innerHTML='';
+  PANELS.forEach(({id,label})=>{
+    const el=document.getElementById(id); if (!el) return;
+    const hex=cssColorToHex(getComputedStyle(el).backgroundColor);
+    const btn=document.createElement('label');
+    btn.className='sb-panel-btn';
+    btn.innerHTML=`<span class="sb-swatch" style="background:${hex}"></span>${label}<input type="color" value="${hex}" style="margin-left:auto;width:28px;height:20px;border:none;padding:1px;cursor:pointer;" oninput="setPanelBg('${id}',this.value)">`;
+    c.appendChild(btn);
+  });
+}
+function setPanelBg(pid, color) {
+  snapshot();
+  const el=document.getElementById(pid); el.style.background=color;
+  const r=parseInt(color.slice(1,3),16),g=parseInt(color.slice(3,5),16),b=parseInt(color.slice(5,7),16);
+  el.style.color=(0.299*r+0.587*g+0.114*b)<128?'var(--white)':'var(--text)';
+}
+
+/* Presets */
+const PRESETS={
+  teal:   {'--teal':'#006d77','--teal-dk':'#004e56','--teal-lt':'#e8f5f6','--accent':'#f4a01c', covers:['#004e56','#006d77','#e8f5f6']},
+  navy:   {'--teal':'#1a237e','--teal-dk':'#0d1257','--teal-lt':'#e8eaf6','--accent':'#ffd600', covers:['#0d1257','#1a237e','#e8eaf6']},
+  forest: {'--teal':'#2e7d32','--teal-dk':'#1b5e20','--teal-lt':'#e8f5e9','--accent':'#ff8f00', covers:['#1b5e20','#2e7d32','#e8f5e9']},
+  crimson:{'--teal':'#b71c1c','--teal-dk':'#7f0000','--teal-lt':'#ffebee','--accent':'#90a4ae', covers:['#7f0000','#b71c1c','#ffebee']},
+  purple: {'--teal':'#6a1b9a','--teal-dk':'#38006b','--teal-lt':'#f3e5f5','--accent':'#ffca28', covers:['#38006b','#6a1b9a','#f3e5f5']},
+};
+function applyPreset(name) {
+  snapshot();
+  const p=PRESETS[name]; if (!p) return;
+  Object.entries(p).forEach(([k,v])=>{ if(k.startsWith('--')) document.documentElement.style.setProperty(k,v); });
+  if (p.covers) {
+    setPanelBg('panel-p1l', p.covers[0]);
+    setPanelBg('panel-p1r', p.covers[1]);
+    document.getElementById('panel-p2m').style.background = p.covers[2];
+  }
+  updatePanelColorList();
+}
+
+/* ── Save PNG ── */
+async function savePNG() {
+  const pages = document.querySelectorAll('.page');
+  const btn = document.querySelector('[onclick="savePNG()"]');
+  const origText = btn.innerHTML;
+  btn.innerHTML = '⏳ Rendering...';
+  btn.disabled = true;
+
+  const wasEdit = document.body.classList.contains('edit-mode');
+  if (wasEdit) setMode('preview');
+
+  try {
+    for (let i = 0; i < pages.length; i++) {
+      const page = pages[i];
+      const canvas = await html2canvas(page, {
+        scale: 6,
+        useCORS: false,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        width: page.offsetWidth,
+        height: page.offsetHeight,
+        scrollX: 0,
+        scrollY: -window.scrollY,
+        logging: false,
+        imageTimeout: 0,
+        removeContainer: true
+      });
+      const link = document.createElement('a');
+      link.download = `beyond-brochure-page${i + 1}.png`;
+      link.href = canvas.toDataURL('image/png', 1.0);
+      link.click();
+      await new Promise(r => setTimeout(r, 500));
+    }
+  } catch(e) {
+    alert('PNG export failed: ' + e.message);
+  } finally {
+    if (wasEdit) setMode('edit');
+    btn.innerHTML = origText;
+    btn.disabled = false;
+  }
+}
+
+/* ── Save HTML ── */
+function saveHTML() {
+  const cl=document.documentElement.cloneNode(true);
+  cl.querySelectorAll('#topbar,#sidebar,#block-toolbar,#add-block-menu').forEach(el=>el.remove());
+  cl.querySelectorAll('.drag-handle').forEach(el=>el.remove());
+  cl.querySelectorAll('[contenteditable]').forEach(el=>el.removeAttribute('contenteditable'));
+  cl.querySelectorAll('.block').forEach(el=>{ el.classList.remove('selected'); el.style.outline=''; });
+  cl.querySelectorAll('script').forEach(el=>el.remove());
+  const body=cl.querySelector('body');
+  body.className=''; body.style.paddingTop='0';
+  const vars=['--teal','--teal-dk','--teal-lt','--accent','--text','--muted']
+    .map(v=>`${v}:${getComputedStyle(document.documentElement).getPropertyValue(v).trim()};`).join('\n    ');
+  const sEl=cl.querySelector('style');
+  if (sEl) sEl.textContent=`:root{\n    ${vars}\n  }\n`+sEl.textContent;
+  const blob=new Blob(['<!DOCTYPE html>\n'+cl.outerHTML],{type:'text/html'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download='beyond-brochure-final.html'; a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+/* ── Init ── */
+document.addEventListener('DOMContentLoaded',()=>{
+  initSortables();
+  rebindBlocks();
+  updatePanelColorList();
+  snapshot();
+
+  // Auto-restore last session if available
+  try {
+    const raw = localStorage.getItem(AS_KEY);
+    if (raw) {
+      const data = JSON.parse(raw);
+      const st = document.getElementById('autosave-status');
+      if (st) st.textContent = 'Last save: ' + new Date(data.ts).toLocaleString();
+    }
+  } catch(e) {}
+
+  // Apply initial zoom fit
+  zoomFit();
+
+  // Click empty panel area → deselect
+  document.querySelectorAll('.page,.panel,.panel-inner,.sortable-zone').forEach(el=>{
+    el.addEventListener('click', e=>{
+      if (e.target===el) selectBlock(null);
+    });
+  });
+
+  // Debounced snapshot + auto-save on text edits
+  let debounce, asDeb;
+  document.addEventListener('input',()=>{
+    clearTimeout(debounce); debounce=setTimeout(snapshot,700);
+    clearTimeout(asDeb); asDeb=setTimeout(autoSave,2000);
+  });
+
+  // Also auto-save after drag-and-drop
+  const origEnd = Sortable.prototype.option;
+  document.querySelectorAll('.sortable-zone').forEach(z=>{
+    z.addEventListener('sortupdate', ()=>autoSave(), true);
+  });
+});
+</script>
+</body>
+</html>

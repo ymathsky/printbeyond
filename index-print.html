@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Beyond Wound Care – Print Materials</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --teal:    #1a6fa3;
+  --teal-dk: #0d4f7c;
+  --teal-lt: #5bb8e0;
+  --accent:  #f4a01c;
+  --white:   #ffffff;
+  --text:    #1e2a35;
+  --font-h:  'Montserrat', 'Segoe UI', Arial, sans-serif;
+  --font-b:  'Inter', 'Segoe UI', Arial, sans-serif;
+}
+
+body {
+  background: #111827;
+  min-height: 100vh;
+  font-family: var(--font-b);
+  color: var(--white);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 0 64px;
+}
+
+/* ── HEADER ── */
+.site-header {
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  margin-bottom: 48px;
+}
+.site-header svg.hdr-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%; height: 100%;
+}
+.hdr-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.hdr-logo {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+}
+.hdr-divider {
+  width: 2px;
+  height: 56px;
+  background: rgba(255,255,255,.25);
+  border-radius: 2px;
+}
+.hdr-text {}
+.hdr-text h1 {
+  font-family: var(--font-h);
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--white);
+  line-height: 1.1;
+}
+.hdr-text p {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.6);
+  margin-top: 5px;
+}
+.hdr-rule {
+  width: 64px;
+  height: 3px;
+  background: var(--accent);
+  border-radius: 2px;
+  margin-top: 8px;
+}
+
+/* ── GRID ── */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 24px;
+  width: 100%;
+  max-width: 1100px;
+  padding: 0 32px;
+}
+
+/* ── CARD ── */
+.item {
+  background: #1a1a2e;
+  border: 1px solid #2a2a44;
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform .18s, box-shadow .18s, border-color .18s;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+}
+.item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 40px rgba(0,0,0,.5);
+  border-color: var(--teal-lt);
+}
+
+/* preview thumbnail area */
+.item-thumb {
+  height: 148px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* individual thumb backgrounds */
+.thumb-sticky    { background: linear-gradient(135deg, #0d4f7c 0%, #1a6fa3 60%, #5bb8e0 100%); }
+.thumb-business  { background: linear-gradient(135deg, #0d4f7c 60%, #1a6fa3 100%); }
+.thumb-folder    { background: linear-gradient(145deg, #0a3a5c 0%, #1a6fa3 50%, #5bb8e0 100%); }
+.thumb-brochure  { background: linear-gradient(135deg, #0d4f7c 0%, #2486c2 100%); }
+.thumb-postcard  { background: linear-gradient(135deg, #1a6fa3 0%, #5bb8e0 100%); }
+
+/* mini thumbnail mockups */
+.mock {
+  position: relative;
+  box-shadow: 0 6px 24px rgba(0,0,0,.5);
+  border-radius: 4px;
+  background: white;
+  overflow: hidden;
+}
+.mock-sticky  { width: 96px; height: 60px; }
+.mock-card    { width: 108px; height: 62px; }
+.mock-folder  { width: 82px; height: 106px; }
+.mock-trifold { width: 120px; height: 84px; }
+.mock-postcard{ width: 110px; height: 70px; }
+
+.mock-inner {
+  position: absolute;
+  inset: 0;
+}
+
+/* sticky note mock */
+.mock-sticky .mock-hdr {
+  height: 18px;
+  background: #0d4f7c;
+  position: relative;
+}
+.mock-sticky .mock-hdr::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 2px;
+  background: #f4a01c;
+}
+.mock-sticky .mock-body {
+  padding: 4px 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.mock-line {
+  height: 2px;
+  background: rgba(26,111,163,.2);
+  border-radius: 1px;
+}
+.mock-line.short { width: 60%; }
+
+/* business card mock */
+.mock-card .mock-side {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 26px;
+  background: #0d4f7c;
+}
+.mock-card .mock-side::after {
+  content: '';
+  position: absolute;
+  right: -1px; top: 0; bottom: 0;
+  width: 1.5px;
+  background: #f4a01c;
+}
+.mock-card .mock-content {
+  margin-left: 30px;
+  padding: 6px 5px 4px;
+}
+.mock-card .mock-name {
+  height: 4px;
+  background: #0d4f7c;
+  border-radius: 1px;
+  margin-bottom: 3px;
+  width: 55px;
+}
+.mock-card .mock-sub {
+  height: 2px;
+  background: rgba(26,111,163,.3);
+  border-radius: 1px;
+  width: 40px;
+  margin-bottom: 4px;
+}
+.mock-card .mock-accent {
+  height: 1.5px;
+  background: #f4a01c;
+  width: 28px;
+  border-radius: 1px;
+  margin-bottom: 4px;
+}
+
+/* folder mock */
+.mock-folder .mock-top {
+  height: 18px;
+  background: #0d4f7c;
+  position: relative;
+}
+.mock-folder .mock-gold {
+  height: 2px;
+  background: #f4a01c;
+}
+.mock-folder .mock-lt {
+  height: 10px;
+  background: #5bb8e0;
+}
+.mock-folder .mock-center {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+}
+.mock-folder .mock-logo-ring {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  border: 2px solid #0d4f7c;
+  display: flex; align-items: center; justify-content: center;
+}
+.mock-folder .mock-logo-ring img {
+  width: 20px; height: 20px; object-fit: contain;
+}
+
+/* brochure / trifold mock */
+.mock-trifold .mock-panel {
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 33.33%;
+}
+.mock-trifold .mock-panel:nth-child(1) { left: 0;       background: #0d4f7c; }
+.mock-trifold .mock-panel:nth-child(2) { left: 33.33%;  background: #1a6fa3; }
+.mock-trifold .mock-panel:nth-child(3) { left: 66.66%;  background: #2486c2; }
+.mock-trifold .mock-panel::after {
+  content: '';
+  position: absolute;
+  right: 0; top: 0; bottom: 0;
+  width: 1px;
+  background: rgba(244,160,28,.5);
+}
+.mock-trifold .mock-panel:last-child::after { display: none; }
+
+/* postcard mock */
+.mock-postcard .mock-left {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 55%;
+  background: linear-gradient(135deg, #0d4f7c, #1a6fa3);
+}
+.mock-postcard .mock-right {
+  position: absolute;
+  right: 0; top: 0; bottom: 0;
+  width: 44%;
+  background: #f8f8f8;
+  display: flex;
+  flex-direction: column;
+  padding: 5px;
+  gap: 2px;
+}
+.mock-postcard .mock-stamp {
+  width: 14px; height: 18px;
+  border: 1px solid #ccc;
+  background: #e0e0e0;
+  align-self: flex-end;
+  border-radius: 1px;
+}
+.mock-postcard .mock-addr-line {
+  height: 2px;
+  background: rgba(0,0,0,.15);
+  border-radius: 1px;
+}
+
+/* item info */
+.item-info {
+  padding: 18px 20px 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.item-tag {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+.item-title {
+  font-family: var(--font-h);
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--white);
+  letter-spacing: .02em;
+  margin-bottom: 6px;
+}
+.item-desc {
+  font-size: 12px;
+  color: #8892a4;
+  line-height: 1.6;
+  flex: 1;
+}
+.item-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid #2a2a44;
+}
+.item-size {
+  font-size: 10px;
+  color: #5a6477;
+  font-weight: 600;
+  letter-spacing: .06em;
+}
+.item-arrow {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--teal-dk);
+  display: flex; align-items: center; justify-content: center;
+  transition: background .15s;
+}
+.item:hover .item-arrow { background: var(--teal); }
+.item-arrow svg { width: 12px; height: 12px; fill: white; }
+
+/* section heading */
+.section-heading {
+  width: 100%;
+  max-width: 1100px;
+  padding: 0 32px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.section-heading h2 {
+  font-family: var(--font-h);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: #4a5568;
+}
+.section-heading::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #2a2a44;
+}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="site-header">
+  <svg class="hdr-bg" viewBox="0 0 1200 180" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <rect width="1200" height="180" fill="#0d4f7c"/>
+    <polygon points="700,0 1200,0 1200,130" fill="#1a6fa3" opacity="0.6"/>
+    <polygon points="950,0 1200,0 1200,60" fill="#5bb8e0" opacity="0.4"/>
+    <polygon points="0,100 280,180 0,180" fill="#071f30" opacity="0.5"/>
+    <line x1="680" y1="0" x2="560" y2="180" stroke="#f4a01c" stroke-width="3" opacity="0.7"/>
+    <rect x="0" y="175" width="1200" height="5" fill="#f4a01c"/>
+  </svg>
+  <div class="hdr-content">
+    <img class="hdr-logo" src="assets/img/beyond.png" alt="Beyond Wound Care">
+    <div class="hdr-divider"></div>
+    <div class="hdr-text">
+      <h1>Print Materials</h1>
+      <p>Beyond Wound Care — Marketing Hub</p>
+      <div class="hdr-rule"></div>
+    </div>
+  </div>
+</header>
+
+<!-- Grid -->
+<div class="section-heading">
+  <h2>All Materials</h2>
+</div>
+
+<div class="grid">
+
+  <!-- Sticky Note -->
+  <a class="item" href="sticky-note.html">
+    <div class="item-thumb thumb-sticky">
+      <div class="mock mock-sticky">
+        <div class="mock-hdr"></div>
+        <div class="mock-body">
+          <div class="mock-line"></div>
+          <div class="mock-line short"></div>
+          <div class="mock-line"></div>
+          <div class="mock-line short"></div>
+        </div>
+      </div>
+    </div>
+    <div class="item-info">
+      <div class="item-tag">Stationery</div>
+      <div class="item-title">Sticky / Post-It Note</div>
+      <div class="item-desc">4×3 inch landscape notepad with teal header, logo, contact info, and write-on lines.</div>
+      <div class="item-footer">
+        <span class="item-size">4″ × 3″ · 300 / 600 DPI</span>
+        <div class="item-arrow"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
+      </div>
+    </div>
+  </a>
+
+  <!-- Business Card -->
+  <a class="item" href="business-card.html">
+    <div class="item-thumb thumb-business">
+      <div class="mock mock-card">
+        <div class="mock-side"></div>
+        <div class="mock-content">
+          <div class="mock-name"></div>
+          <div class="mock-sub"></div>
+          <div class="mock-accent"></div>
+          <div class="mock-line" style="height:2px;width:60px;background:rgba(0,0,0,.1);margin-bottom:2px;"></div>
+          <div class="mock-line" style="height:2px;width:50px;background:rgba(0,0,0,.1);margin-bottom:2px;"></div>
+          <div class="mock-line" style="height:2px;width:55px;background:rgba(0,0,0,.1);"></div>
+        </div>
+      </div>
+    </div>
+    <div class="item-info">
+      <div class="item-tag">Business Card</div>
+      <div class="item-title">Business Card</div>
+      <div class="item-desc">Front & back. Personalize with name & direct phone. Dark teal diagonal design with gold accent.</div>
+      <div class="item-footer">
+        <span class="item-size">3.5″ × 2″ · Front + Back</span>
+        <div class="item-arrow"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
+      </div>
+    </div>
+  </a>
+
+  <!-- Folder Front Cover -->
+  <a class="item" href="folder-cover.html">
+    <div class="item-thumb thumb-folder">
+      <div class="mock mock-folder" style="display:flex;flex-direction:column;">
+        <div class="mock-top"></div>
+        <div class="mock-gold"></div>
+        <div class="mock-lt"></div>
+        <div class="mock-center" style="flex:1;display:flex;align-items:center;justify-content:center;">
+          <div class="mock-logo-ring">
+            <img src="assets/img/beyond.png" alt="">
+          </div>
+        </div>
+        <div style="height:14px;background:#0d4f7c;"></div>
+      </div>
+    </div>
+    <div class="item-info">
+      <div class="item-tag">Folder Cover</div>
+      <div class="item-title">Folder — Front Cover</div>
+      <div class="item-desc">8×11 presentation folder front. Diagonal slant header, circle-ring logo, address, slant footer with phone/fax.</div>
+      <div class="item-footer">
+        <span class="item-size">8″ × 11″ · 300 / 600 DPI</span>
+        <div class="item-arrow"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
+      </div>
+    </div>
+  </a>
+
+  <!-- Folder Back Cover -->
+  <a class="item" href="folder-back.html">
+    <div class="item-thumb thumb-folder">
+      <div class="mock mock-folder" style="display:flex;flex-direction:column;">
+        <div class="mock-top" style="background:linear-gradient(135deg,#0d4f7c,#1a6fa3);height:28px;"></div>
+        <div style="flex:1;background:white;display:flex;align-items:center;justify-content:center;padding:4px;">
+          <div style="text-align:center;">
+            <img src="assets/img/beyond.png" style="width:18px;height:18px;object-fit:contain;">
+          </div>
+        </div>
+        <div style="height:28px;background:#0d4f7c;"></div>
+      </div>
+    </div>
+    <div class="item-info">
+      <div class="item-tag">Folder Cover</div>
+      <div class="item-title">Folder — Back Cover</div>
+      <div class="item-desc">8×11 presentation folder back. Wave-curve header and footer, logo, contact info block, website URL.</div>
+      <div class="item-footer">
+        <span class="item-size">8″ × 11″ · 300 / 600 DPI</span>
+        <div class="item-arrow"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
+      </div>
+    </div>
+  </a>
+
+  <!-- Brochure -->
+  <a class="item" href="brochure.html">
+    <div class="item-thumb thumb-brochure">
+      <div class="mock mock-trifold">
+        <div class="mock-panel"></div>
+        <div class="mock-panel"></div>
+        <div class="mock-panel"></div>
+      </div>
+    </div>
+    <div class="item-info">
+      <div class="item-tag">Brochure</div>
+      <div class="item-title">Tri-Fold Brochure</div>
+      <div class="item-desc">Three-panel brochure layout with services, contact info, and brand messaging.</div>
+      <div class="item-footer">
+        <span class="item-size">11″ × 8.5″ · Tri-fold</span>
+        <div class="item-arrow"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
+      </div>
+    </div>
+  </a>
+
+  <!-- Postcard -->
+  <a class="item" href="postcard.html">
+    <div class="item-thumb thumb-postcard">
+      <div class="mock mock-postcard">
+        <div class="mock-left"></div>
+        <div class="mock-right">
+          <div class="mock-stamp"></div>
+          <div class="mock-addr-line" style="width:70%;margin-top:auto;"></div>
+          <div class="mock-addr-line" style="width:85%;"></div>
+          <div class="mock-addr-line" style="width:55%;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="item-info">
+      <div class="item-tag">Direct Mail</div>
+      <div class="item-title">Postcard</div>
+      <div class="item-desc">Postcard mailer with branded design on the front and address area on the back.</div>
+      <div class="item-footer">
+        <span class="item-size">6″ × 4″ · 300 / 600 DPI</span>
+        <div class="item-arrow"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
+      </div>
+    </div>
+  </a>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,24 @@
+# Python virtual environment
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# XAMPP / PHP
+*.log
+*.tmp
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/settings.json
+*.code-workspace
+
+# Exported PNGs (generated on demand)
+beyond-*.png
+
+# Node
+node_modules/

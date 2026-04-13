@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Beyond Wound Care – Folder Back Cover</title>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Montserrat:ital,wght@0,600;0,700;0,800;0,900&display=swap" rel="stylesheet">
+<style>
+/* ── reset ─────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+/* ── brand tokens ──────────────────────────── */
+:root {
+  --teal:     #1a6fa3;
+  --teal-dk:  #0d4f7c;
+  --teal-lt:  #5bb8e0;
+  --teal-md:  #2486c2;
+  --accent:   #f4a01c;
+  --white:    #ffffff;
+  --text:     #1e2a35;
+  --muted:    #607080;
+  --font-h:   'Montserrat', 'Segoe UI', Arial, sans-serif;
+  --font-b:   'Inter', 'Segoe UI', Arial, sans-serif;
+
+  /* 8×11 inches @ 96px/in */
+  --cover-w: 768px;
+  --cover-h: 1056px;
+}
+
+/* ── page shell ────────────────────────────── */
+body {
+  background: #22223a;
+  font-family: var(--font-b);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px 24px 60px;
+}
+
+/* ── toolbar ─────────────────────────────────*/
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+.toolbar h2 {
+  width: 100%;
+  text-align: center;
+  color: #cdd6f4;
+  font-family: var(--font-h);
+  font-size: 12px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.btn {
+  background: var(--teal);
+  color: #fff;
+  border: none;
+  padding: 9px 22px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: var(--font-b);
+  letter-spacing: .02em;
+  transition: background .14s;
+}
+.btn:hover { background: var(--teal-dk); }
+.btn.accent { background: var(--accent); color: #1e2a35; }
+.btn.accent:hover { background: #d4880e; }
+.btn.ghost { background: transparent; border: 1.5px solid #555; color: #bbb; }
+.btn.ghost:hover { border-color: #89b4fa; color: #89b4fa; }
+
+/* ── bleed wrapper ───────────────────────────*/
+.bleed-wrap {
+  position: relative;
+  width: calc(var(--cover-w) + 28px);
+  height: calc(var(--cover-h) + 28px);
+  background: repeating-linear-gradient(
+    45deg,
+    #ff6b6b1a 0px, #ff6b6b1a 4px,
+    transparent 4px, transparent 8px
+  );
+  border: 1.5px dashed #ff6b6b55;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.bleed-label {
+  position: absolute;
+  top: -18px; left: 0;
+  font-size: 9px;
+  color: #ff6b6b88;
+  font-family: var(--font-b);
+  letter-spacing: .04em;
+}
+
+/* ════════════════════════════════════════════
+   BACK COVER  (8 × 11 inches)
+════════════════════════════════════════════ */
+.cover {
+  width:  var(--cover-w);
+  height: var(--cover-h);
+  background: var(--white);
+  overflow: hidden;
+  box-shadow: 0 12px 56px rgba(0,0,0,.6);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+/* ── TOP WAVE BAND ── */
+.cover-top {
+  width: 100%;
+  flex-shrink: 0;
+  height: 220px;
+  line-height: 0;
+  position: relative;
+}
+.cover-top svg {
+  width: 100%; height: 100%;
+  display: block;
+}
+
+/* ── CENTER BODY ── */
+.cover-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 72px 32px;
+  /* subtle diagonal line pattern */
+  background-color: var(--white);
+  background-image:
+    linear-gradient(rgba(26,111,163,.09) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(26,111,163,.09) 1px, transparent 1px),
+    linear-gradient(rgba(244,160,28,.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(244,160,28,.05) 1px, transparent 1px);
+  background-size: 56px 56px, 56px 56px, 14px 14px, 14px 14px;
+}
+
+/* Logo + name block (centered) */
+.logo-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 40px;
+}
+.logo-wrap img {
+  width: 160px;
+  height: 160px;
+  object-fit: contain;
+}
+.company-name {
+  font-family: var(--font-h);
+  font-size: 48px;
+  font-weight: 900;
+  color: var(--teal-dk);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  text-align: center;
+  line-height: 1.1;
+  margin-top: 14px;
+}
+.company-sub {
+  font-family: var(--font-h);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--teal-md);
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  text-align: center;
+  margin-top: 6px;
+}
+.name-rule {
+  width: 200px;
+  height: 4px;
+  background: var(--accent);
+  border-radius: 2px;
+  margin-top: 16px;
+}
+
+/* Contact info block (left-aligned, like the photo) */
+.contact-block {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+  margin-top: 8px;
+}
+.contact-line {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  font-family: var(--font-b);
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.45;
+}
+.contact-line svg {
+  width: 17px; height: 17px;
+  fill: var(--teal-dk);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.contact-line strong {
+  font-weight: 700;
+  color: var(--teal-dk);
+  text-transform: uppercase;
+  font-size: 13px;
+  letter-spacing: .1em;
+  display: block;
+  margin-bottom: 1px;
+}
+.divider-line {
+  width: 100%;
+  height: 1px;
+  background: rgba(26,111,163,.15);
+  margin: 6px 0;
+}
+
+/* ── BOTTOM WAVE BAND ── */
+.cover-bottom {
+  width: 100%;
+  flex-shrink: 0;
+  height: 300px;
+  position: relative;
+  line-height: 0;
+}
+.cover-bottom svg {
+  position: absolute;
+  inset: 0;
+  width: 100%; height: 100%;
+  display: block;
+}
+.website-label {
+  position: absolute;
+  bottom: 38px;
+  left: 52px;
+  font-family: var(--font-h);
+  font-size: 24px;
+  font-weight: 700;
+  color: rgba(255,255,255,.92);
+  letter-spacing: .06em;
+}
+
+/* ── print ──────────────────────────────────*/
+@media print {
+  body { background: white !important; padding: 0 !important; }
+  .toolbar, .bleed-label, .info-box { display: none !important; }
+  .bleed-wrap {
+    width: 8in !important; height: 11in !important;
+    background: none !important; border: none !important;
+    padding: 0 !important; margin: 0 !important;
+  }
+  .cover {
+    width: 8in !important; height: 11in !important;
+    box-shadow: none !important;
+  }
+  @page { size: 8in 11in; margin: 0; }
+  *, *::before, *::after { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- Toolbar -->
+<div class="toolbar">
+  <h2>Beyond Wound Care — Folder Back Cover (8″ × 11″)</h2>
+  <button class="btn accent" onclick="exportCover(this, false)">⬇ Export PNG (300 DPI)</button>
+  <button class="btn accent" onclick="exportCover(this, true)">⬇ Export Hi-Res (600 DPI)</button>
+  <button class="btn ghost" onclick="window.print()">🖨 Print</button>
+</div>
+
+<!-- Bleed guide -->
+<div class="bleed-wrap">
+  <span class="bleed-label">⬡ Red hatching = bleed zone — keep content inside the white area</span>
+
+  <!-- ══════════ BACK COVER ══════════ -->
+  <div class="cover" id="cover">
+
+    <!-- Top wave band -->
+    <div class="cover-top">
+      <svg viewBox="0 0 768 220" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- dark teal back fill -->
+        <rect width="768" height="220" fill="#0d4f7c"/>
+        <!-- lighter teal gradient overlay top-right -->
+        <polygon points="380,0 768,0 768,180" fill="#2486c2" opacity="0.55"/>
+        <polygon points="600,0 768,0 768,100" fill="#5bb8e0" opacity="0.45"/>
+        <!-- white wave curve cutting bottom of band -->
+        <path d="M0,155 C160,210 320,120 480,165 C600,200 680,145 768,160 L768,220 L0,220 Z" fill="white"/>
+        <!-- gold accent line just above white wave -->
+        <path d="M0,148 C160,203 320,113 480,158 C600,193 680,138 768,153" fill="none" stroke="#f4a01c" stroke-width="4"/>
+      </svg>
+    </div>
+
+    <!-- Center body -->
+    <div class="cover-body">
+
+      <!-- Logo + company name centered -->
+      <div class="logo-wrap">
+        <img src="assets/img/beyond.png" alt="Beyond Wound Care">
+        <div class="company-name">Beyond Wound Care</div>
+        <div class="company-sub">Internal Medicine &amp; Wound Care</div>
+        <div class="name-rule"></div>
+      </div>
+
+      <!-- Contact info left-aligned -->
+      <div class="contact-block">
+
+        <div class="contact-line">
+          <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 110-5 2.5 2.5 0 010 5z"/></svg>
+          <div>
+            <strong>Office</strong>
+            1340 Remington Rd. Ste P, Schaumburg, IL 60173
+          </div>
+        </div>
+
+        <div class="divider-line"></div>
+
+        <div class="contact-line">
+          <svg viewBox="0 0 24 24"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1-9.4 0-17-7.6-17-17 0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z"/></svg>
+          <div>
+            <strong>Phone</strong>
+            847.873.8693
+          </div>
+        </div>
+
+        <div class="contact-line">
+          <svg viewBox="0 0 24 24"><path d="M19 2H5a2 2 0 00-2 2v14a2 2 0 002 2h4l3 3 3-3h4a2 2 0 002-2V4a2 2 0 00-2-2zm-1 13H6v-2h12v2zm0-4H6V9h12v2zm0-4H6V5h12v2z"/></svg>
+          <div>
+            <strong>Fax</strong>
+            847.873.8486
+          </div>
+        </div>
+
+        <div class="divider-line"></div>
+
+        <div class="contact-line">
+          <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+          <div>
+            <strong>Email</strong>
+            info@beyondwoundcare.com
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Bottom wave band -->
+    <div class="cover-bottom">
+      <svg viewBox="0 0 768 300" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- dark teal base -->
+        <rect width="768" height="300" fill="#0d4f7c"/>
+        <!-- lighter teal accent shapes top-left -->
+        <polygon points="0,100 300,300 0,300" fill="#2486c2" opacity="0.5"/>
+        <polygon points="0,160 180,300 0,300" fill="#5bb8e0" opacity="0.4"/>
+        <!-- white wave at top of footer curving in -->
+        <path d="M0,0 C90,55 230,10 380,45 C520,80 640,30 768,48 L768,0 Z" fill="white"/>
+        <!-- gold accent line along the wave -->
+        <path d="M0,7 C90,62 230,17 380,52 C520,87 640,37 768,55" fill="none" stroke="#f4a01c" stroke-width="4"/>
+      </svg>
+      <!-- Website URL -->
+      <div class="website-label">www.beyondwoundcare.com</div>
+    </div>
+
+  </div><!-- /cover -->
+</div><!-- /bleed-wrap -->
+
+<!-- Info box -->
+<div class="info-box" style="max-width:560px;background:#1a1a2e;border:1px solid #313250;border-radius:8px;padding:16px 20px;margin-top:28px;color:#a6adc8;font-size:12px;line-height:1.7;font-family:'Inter',sans-serif;">
+  <div style="color:#89b4fa;font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;margin-bottom:8px;">VistaPrint / Print Shop Guide — Folder Back Cover</div>
+  <ul style="padding-left:16px;">
+    <li>Click <strong style="color:#f4a01c;">Export Hi-Res (600 DPI)</strong> to download the PNG for print submission.</li>
+    <li>Submit alongside <strong>folder-cover.html</strong> export as the front &amp; back of the same presentation folder.</li>
+    <li>The red hatched border is the bleed guide and will NOT appear in the exported file.</li>
+  </ul>
+</div>
+
+<!-- Export script -->
+<script>
+async function exportCover(btn, hiRes = false) {
+  const el = document.getElementById('cover');
+  const scale = hiRes ? 6 : 3;
+  const suffix = hiRes ? '600dpi' : '300dpi';
+
+  const orig = btn.textContent;
+  btn.textContent = '⏳ Rendering…';
+  btn.disabled = true;
+
+  try {
+    const cvs = await html2canvas(el, {
+      scale,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: '#ffffff',
+      logging: false,
+      imageTimeout: 0,
+      removeContainer: true,
+      onclone: (clonedDoc) => {
+        const c = clonedDoc.getElementById('cover');
+        if (c) { c.style.borderRadius = '0'; c.style.boxShadow = 'none'; }
+      }
+    });
+    const link = document.createElement('a');
+    link.download = `beyond-folder-back-${suffix}.png`;
+    link.href = cvs.toDataURL('image/png', 1.0);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  } catch (err) {
+    alert('Export failed: ' + err.message);
+  } finally {
+    btn.textContent = orig;
+    btn.disabled = false;
+  }
+}
+</script>
+</body>
+</html>

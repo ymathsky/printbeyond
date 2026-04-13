@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Beyond Wound Care – Business Card</title>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+:root {
+  --teal:    #1a6fa3;
+  --teal-dk: #0d4f7c;
+  --teal-lt: #5bb8e0;
+  --accent:  #f4a01c;
+  --white:   #ffffff;
+  --text:    #1e2a35;
+  --font-h:  'Montserrat', 'Segoe UI', Arial, sans-serif;
+  --font-b:  'Inter', 'Segoe UI', Arial, sans-serif;
+
+  /* 3.5 × 2 inches @ 96px/in */
+  --card-w: 336px;
+  --card-h: 192px;
+}
+
+body {
+  background: #22223a;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  padding: 40px 24px;
+  font-family: var(--font-b);
+}
+
+/* ── toolbar ── */
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+.toolbar h2 {
+  width: 100%;
+  text-align: center;
+  color: #cdd6f4;
+  font-family: var(--font-h);
+  font-size: 11px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+.btn {
+  background: var(--teal);
+  color: #fff;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: var(--font-b);
+  letter-spacing: .02em;
+  transition: background .14s;
+}
+.btn:hover { background: var(--teal-dk); }
+.btn.accent { background: var(--accent); color: #1e2a35; }
+.btn.accent:hover { background: #d4880e; }
+.btn.ghost { background: transparent; border: 1.5px solid #555; color: #bbb; }
+.btn.ghost:hover { border-color: #89b4fa; color: #89b4fa; }
+
+/* ── card wrapper (bleed) ── */
+.card-wrap {
+  position: relative;
+  width: calc(var(--card-w) + 24px);
+  height: calc(var(--card-h) + 24px);
+  background: repeating-linear-gradient(
+    45deg,
+    #ff6b6b18 0px, #ff6b6b18 3px,
+    transparent 3px, transparent 7px
+  );
+  border: 1.5px dashed #ff6b6b44;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.card-label {
+  position: absolute;
+  top: -16px; left: 0;
+  font-size: 8px;
+  color: #ff6b6b77;
+  letter-spacing: .04em;
+}
+
+/* ════════════════════════════
+   BUSINESS CARD — FRONT
+════════════════════════════ */
+.card {
+  width: var(--card-w);
+  height: var(--card-h);
+  background: var(--white);
+  overflow: hidden;
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.55);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── left teal column ── */
+.card-left {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 80px;
+  overflow: hidden;
+  z-index: 1;
+}
+.card-left svg {
+  width: 100%; height: 100%;
+  display: block;
+}
+
+/* ── right content area ── */
+.card-right {
+  margin-left: 88px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 12px 14px 12px 0;
+  z-index: 2;
+}
+
+/* name / title */
+.card-name {
+  font-family: var(--font-h);
+  font-size: 13.5px;
+  font-weight: 900;
+  color: var(--teal-dk);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  line-height: 1.15;
+}
+.card-title {
+  font-family: var(--font-h);
+  font-size: 7px;
+  font-weight: 700;
+  color: var(--teal);
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  margin-top: 3px;
+  margin-bottom: 2px;
+}
+.card-rule {
+  width: 80px;
+  height: 2.5px;
+  background: var(--accent);
+  border-radius: 2px;
+  margin: 5px 0 8px;
+}
+
+/* contact lines */
+.card-contacts {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.cline {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-b);
+  font-size: 7.5px;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1;
+}
+.cline svg {
+  width: 8px; height: 8px;
+  fill: var(--teal-dk);
+  flex-shrink: 0;
+}
+
+/* ── person name on card ── */
+.card-person {
+  font-family: var(--font-h);
+  font-size: 9px;
+  font-weight: 800;
+  color: var(--teal-dk);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  margin-bottom: 1px;
+}
+.card-person-phone {
+  font-family: var(--font-b);
+  font-size: 7.5px;
+  font-weight: 600;
+  color: var(--teal);
+  letter-spacing: .04em;
+  margin-bottom: 4px;
+}
+
+/* ── input panel ── */
+.input-panel {
+  background: #1a1a2e;
+  border: 1px solid #313250;
+  border-radius: 10px;
+  padding: 18px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 360px;
+}
+.input-panel h3 {
+  color: #89b4fa;
+  font-family: var(--font-h);
+  font-size: 10px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.field label {
+  font-size: 10px;
+  font-weight: 700;
+  color: #a6adc8;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  font-family: var(--font-b);
+}
+.field input {
+  background: #11111d;
+  border: 1px solid #3a3a5c;
+  border-radius: 6px;
+  padding: 8px 12px;
+  color: #e0e4f4;
+  font-size: 13px;
+  font-family: var(--font-b);
+  outline: none;
+  transition: border-color .15s;
+}
+.field input:focus {
+  border-color: #1a6fa3;
+}
+.field input::placeholder {
+  color: #4a4a6a;
+}
+
+/* website pill at bottom */
+.card-web {
+  position: absolute;
+  bottom: 10px;
+  right: 12px;
+  font-family: var(--font-h);
+  font-size: 7px;
+  font-weight: 700;
+  color: var(--teal);
+  letter-spacing: .08em;
+}
+
+/* ════════════════════════════
+   BUSINESS CARD — BACK
+════════════════════════════ */
+.card-back {
+  width: var(--card-w);
+  height: var(--card-h);
+  overflow: hidden;
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.55);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  background: var(--teal-dk);
+}
+.card-back svg.back-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%; height: 100%;
+  display: block;
+}
+.back-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-align: center;
+  padding: 12px 20px;
+}
+.back-logo {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+}
+.back-name {
+  font-family: var(--font-h);
+  font-size: 11px;
+  font-weight: 900;
+  color: var(--white);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  line-height: 1.2;
+}
+.back-rule {
+  width: 60px;
+  height: 2px;
+  background: var(--accent);
+  border-radius: 2px;
+}
+.back-web {
+  font-family: var(--font-h);
+  font-size: 7px;
+  font-weight: 700;
+  color: rgba(255,255,255,.75);
+  letter-spacing: .1em;
+}
+/* section label between cards */
+.section-label {
+  color: #a6adc8;
+  font-family: var(--font-h);
+  font-size: 9px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  margin-bottom: -20px;
+  align-self: flex-start;
+  margin-left: calc((100% - var(--card-w)) / 2 + 12px);
+}
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <h2>Beyond Wound Care — Business Card (3.5″ × 2″)</h2>
+  <button class="btn accent" onclick="exportCard('card-front', this, false)">⬇ Front 300 DPI</button>
+  <button class="btn accent" onclick="exportCard('card-front', this, true)">⬇ Front 600 DPI</button>
+  <button class="btn" onclick="exportCard('card-back', this, false)">⬇ Back 300 DPI</button>
+  <button class="btn" onclick="exportCard('card-back', this, true)">⬇ Back 600 DPI</button>
+  <button class="btn ghost" onclick="window.print()">🖨 Print</button>
+</div>
+
+<!-- FRONT -->
+<div class="card-wrap">
+  <span class="card-label">⬡ Bleed guide — front</span>
+  <div class="card" id="card-front">
+
+    <!-- Left teal column with diagonal cut -->
+    <div class="card-left">
+      <svg viewBox="0 0 80 192" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="0,0 80,0 80,192 0,192" fill="#0d4f7c"/>
+        <!-- diagonal slice cuts off right side -->
+        <polygon points="50,0 80,0 80,192 20,192" fill="#1a6fa3"/>
+        <polygon points="64,0 80,0 80,120" fill="#5bb8e0" opacity="0.5"/>
+        <!-- gold accent diagonal line -->
+        <line x1="50" y1="0" x2="20" y2="192" stroke="#f4a01c" stroke-width="2.5"/>
+      </svg>
+      <!-- Logo centered in the column -->
+      <img src="assets/img/beyond.png" alt=""
+           style="position:absolute;top:50%;left:50%;transform:translate(-56%,-50%);width:52px;height:52px;object-fit:contain;z-index:3;">
+    </div>
+
+    <!-- Right content -->
+    <div class="card-right">
+      <div class="card-person" id="display-name"></div>
+      <div class="card-person-phone" id="display-phone"></div>
+      <div class="card-name">Beyond<br>Wound Care</div>
+      <div class="card-title">Internal Medicine &amp; Wound Care</div>
+      <div class="card-rule"></div>
+      <div class="card-contacts">
+        <div class="cline">
+          <svg viewBox="0 0 24 24"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1-9.4 0-17-7.6-17-17 0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z"/></svg>
+          847.873.8693
+        </div>
+        <div class="cline">
+          <svg viewBox="0 0 24 24"><path d="M19 2H5a2 2 0 00-2 2v14a2 2 0 002 2h4l3 3 3-3h4a2 2 0 002-2V4a2 2 0 00-2-2zm-1 13H6v-2h12v2zm0-4H6V9h12v2zm0-4H6V5h12v2z"/></svg>
+          847.873.8486 (Fax)
+        </div>
+        <div class="cline">
+          <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+          info@beyondwoundcare.com
+        </div>
+        <div class="cline">
+          <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 110-5 2.5 2.5 0 010 5z"/></svg>
+          1340 Remington Rd. Ste P, Schaumburg, IL 60173
+        </div>
+      </div>
+    </div>
+
+    <div class="card-web">www.beyondwoundcare.com</div>
+
+  </div>
+</div>
+<!-- BACK -->
+<div class="section-label">▲ FRONT &nbsp;&nbsp;&nbsp; BACK ▼</div>
+<div class="card-wrap">
+  <span class="card-label">⬡ Bleed guide — back</span>
+  <div class="card-back" id="card-back">
+
+    <!-- Background SVG shapes -->
+    <svg class="back-bg" viewBox="0 0 336 192" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- dark teal base fills all -->
+      <rect width="336" height="192" fill="#0d4f7c"/>
+      <!-- diagonal lighter teal top-right accent -->
+      <polygon points="200,0 336,0 336,130" fill="#1a6fa3" opacity="0.7"/>
+      <polygon points="270,0 336,0 336,60" fill="#5bb8e0" opacity="0.45"/>
+      <!-- diagonal darker bottom-left accent -->
+      <polygon points="0,100 130,192 0,192" fill="#071f30" opacity="0.5"/>
+      <!-- gold diagonal accent line top -->
+      <line x1="200" y1="0" x2="120" y2="192" stroke="#f4a01c" stroke-width="2" opacity="0.8"/>
+      <!-- subtle second gold line -->
+      <line x1="230" y1="0" x2="150" y2="192" stroke="#f4a01c" stroke-width="1" opacity="0.35"/>
+    </svg>
+
+    <div class="back-content">
+      <img class="back-logo" src="assets/img/beyond.png" alt="Beyond Wound Care">
+      <div class="back-rule"></div>
+      <div class="back-name">Beyond Wound Care</div>
+      <div class="back-web">www.beyondwoundcare.com</div>
+    </div>
+
+  </div>
+</div>
+<div class="input-panel">
+  <h3>Personalize Card</h3>
+  <div class="field">
+    <label>Full Name</label>
+    <input type="text" id="input-name" placeholder="e.g. Dr. Sarah Johnson" oninput="updateCard()">
+  </div>
+  <div class="field">
+    <label>Personal / Direct Phone</label>
+    <input type="text" id="input-phone" placeholder="e.g. 847.555.0123" oninput="updateCard()">
+  </div>
+</div>
+
+<!-- Export script -->
+<script>
+function updateCard() {
+  const name = document.getElementById('input-name').value.trim();
+  const phone = document.getElementById('input-phone').value.trim();
+  const nameEl = document.getElementById('display-name');
+  const phoneEl = document.getElementById('display-phone');
+  nameEl.textContent = name;
+  nameEl.style.display = name ? 'block' : 'none';
+  phoneEl.textContent = phone ? 'Direct: ' + phone : '';
+  phoneEl.style.display = phone ? 'block' : 'none';
+}
+updateCard(); // init hidden
+</script>
+
+<script>
+async function exportCard(id, btn, hiRes = false) {
+  const el = document.getElementById(id);
+  const scale = hiRes ? 6 : 3;
+  const suffix = hiRes ? '600dpi' : '300dpi';
+  const side = id === 'card-back' ? 'back' : 'front';
+  const orig = btn.textContent;
+  btn.textContent = '⏳ Rendering…';
+  btn.disabled = true;
+  try {
+    const cvs = await html2canvas(el, {
+      scale, useCORS: true, allowTaint: true,
+      backgroundColor: id === 'card-back' ? '#0d4f7c' : '#ffffff',
+      logging: false, imageTimeout: 0, removeContainer: true,
+      onclone: (doc) => {
+        const c = doc.getElementById(id);
+        if (c) { c.style.borderRadius = '0'; c.style.boxShadow = 'none'; }
+      }
+    });
+    const link = document.createElement('a');
+    link.download = `beyond-business-card-${side}-${suffix}.png`;
+    link.href = cvs.toDataURL('image/png', 1.0);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  } catch (err) {
+    alert('Export failed: ' + err.message);
+  } finally {
+    btn.textContent = orig;
+    btn.disabled = false;
+  }
+}
+</script>
+</body>
+</html>

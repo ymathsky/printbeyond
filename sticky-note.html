@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Beyond Wound Care – Sticky Note</title>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Montserrat:ital,wght@0,700;0,800;0,900&display=swap" rel="stylesheet">
+<style>
+/* ── reset ─────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+/* ── brand tokens ──────────────────────────── */
+:root {
+  --teal:     #1a6fa3;
+  --teal-dk:  #0d4f7c;   /* darker left band */
+  --teal-lt:  #2db5e8;   /* lighter right accent */
+  --teal-bg:  #e8f3fc;
+  --accent:   #f4a01c;
+  --white:    #ffffff;
+  --text:     #1e2a35;
+  --muted:    #607080;
+  --line:     #d4e6f4;
+  --font-h:   'Montserrat', 'Segoe UI', Arial, sans-serif;
+  --font-b:   'Inter', 'Segoe UI', Arial, sans-serif;
+
+  /* Note size: 4×3 inches @ 100px/in = 400×300px on screen (landscape) */
+  --note-w:    400px;
+  --note-h:    300px;
+  --header-h:  76px;
+}
+
+/* ── page shell ────────────────────────────── */
+body {
+  background: #22223a;
+  font-family: var(--font-b);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px 24px 52px;
+  gap: 0;
+}
+
+/* ── toolbar ────────────────────────────────── */
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+.toolbar h2 {
+  width: 100%;
+  text-align: center;
+  color: #cdd6f4;
+  font-family: var(--font-h);
+  font-size: 12px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.btn {
+  background: var(--teal);
+  color: #fff;
+  border: none;
+  padding: 9px 22px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: var(--font-b);
+  letter-spacing: .02em;
+  transition: background .14s;
+}
+.btn:hover { background: var(--teal-dk); }
+.btn.accent { background: var(--accent); color: #1e2a35; }
+.btn.accent:hover { background: #d4880e; }
+.btn.ghost { background: transparent; border: 1.5px solid #555; color: #bbb; }
+.btn.ghost:hover { border-color: #89b4fa; color: #89b4fa; }
+
+/* ── bleed wrapper ──────────────────────────── */
+.bleed-wrap {
+  position: relative;
+  width: calc(var(--note-w) + 26px);
+  height: calc(var(--note-h) + 26px);
+  background: repeating-linear-gradient(
+    45deg,
+    #ff6b6b1a 0px, #ff6b6b1a 4px,
+    transparent 4px, transparent 8px
+  );
+  border: 1.5px dashed #ff6b6b55;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.bleed-label {
+  position: absolute;
+  top: -18px; left: 0;
+  font-size: 9px;
+  color: #ff6b6b88;
+  font-family: var(--font-b);
+  letter-spacing: .04em;
+}
+
+/* ═══════════════════════════════════════════════
+   NOTE CARD  (4 × 4 inches square)
+═══════════════════════════════════════════════ */
+.note {
+  width:  var(--note-w);
+  height: var(--note-h);
+  background: var(--white);
+  border-radius: 3px;
+  overflow: hidden;
+  box-shadow: 0 10px 48px rgba(0,0,0,.55);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+/* ─── HEADER ─────────────────────────────────── */
+.note-header {
+  width: 100%;
+  height: var(--header-h);
+  background: linear-gradient(110deg, var(--teal-dk) 0%, var(--teal) 55%, #1f85bf 100%);
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  gap: 0;
+}
+
+/* Subtle dark left mass */
+.note-header .band-left,
+.note-header .band-right,
+.note-header .band-bar { display: none; } /* replaced by inline SVG below */
+
+/* header SVG bands — rendered by html2canvas reliably */
+.header-bands {
+  position: absolute;
+  inset: 0;
+  width: 100%; height: 100%;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Header content — horizontal layout */
+.note-header-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.header-logo {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+  flex-shrink: 0;
+  background: none;
+  border-radius: 0;
+  padding: 0;
+}
+
+/* Thin vertical divider */
+.header-divider {
+  width: 1.5px;
+  height: 50px;
+  background: rgba(255,255,255,.22);
+  flex-shrink: 0;
+  border-radius: 2px;
+}
+
+.header-brand {
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+.header-brand .b1 {
+  font-family: var(--font-h);
+  font-size: 15px;
+  font-weight: 900;
+  color: var(--white);
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  text-shadow: 0 1px 8px rgba(0,0,0,.3);
+  display: block;
+  white-space: nowrap;
+}
+.header-brand .b2 {
+  font-family: var(--font-h);
+  font-size: 6.5px;
+  font-weight: 600;
+  color: rgba(255,255,255,.75);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  display: block;
+  margin-top: 3px;
+  white-space: nowrap;
+}
+.header-brand .b3 {
+  display: inline-block;
+  margin-top: 3px;
+  background: var(--accent);
+  color: #1e2a35;
+  font-family: var(--font-b);
+  font-size: 7.5px;
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 20px;
+  align-self: flex-start;
+  white-space: nowrap;
+}
+
+/* ─── BODY ───────────────────────────────────── */
+.note-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 12px 22px 0;
+  position: relative;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 25px,
+    var(--line) 25px,
+    var(--line) 26px
+  );
+  background-position: 0 34px;
+}
+
+/* Very faint watermark logo in body */
+.note-body::before {
+  content: '';
+  position: absolute;
+  bottom: 44px; right: 18px;
+  width: 90px; height: 90px;
+  background: url('assets/img/beyond.png') center/contain no-repeat;
+  opacity: .045;
+  pointer-events: none;
+}
+
+/* "From the desk of" label */
+.note-from {
+  font-family: var(--font-h);
+  font-size: 8.5px;
+  font-weight: 700;
+  color: var(--teal);
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ─── CONTACT FOOTER ─────────────────────────── */
+.note-footer {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 8px 14px;
+  background: var(--teal-dk);
+  margin-top: auto;
+}
+.note-footer .footer-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+}
+.note-footer .fi {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 8.5px;
+  color: rgba(255,255,255,.92);
+  font-weight: 600;
+  letter-spacing: .02em;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.note-footer .fi svg {
+  width: 11px; height: 11px;
+  fill: var(--accent);
+  flex-shrink: 0;
+}
+.note-footer .sep {
+  width: 3px; height: 3px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.25);
+  flex-shrink: 0;
+}
+
+/* ── notes panel ────────────────────────────── */
+.info-box {
+  max-width: 480px;
+  background: #1a1a2e;
+  border: 1px solid #313250;
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin-top: 28px;
+  color: #a6adc8;
+  font-size: 12px;
+  line-height: 1.7;
+}
+.info-box h3 {
+  color: #89b4fa;
+  font-size: 10px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.info-box ul { padding-left: 16px; }
+.info-box li { margin-bottom: 3px; }
+.hl { color: #f4a01c; font-weight: 600; }
+
+/* ── print ──────────────────────────────────── */
+@media print {
+  body  { background: white !important; padding: 0 !important; margin: 0 !important; }
+  .toolbar, .bleed-label, .info-box { display: none !important; }
+  /* Reset bleed wrapper — the note is INSIDE it so we cannot hide it */
+  .bleed-wrap {
+    width: 4in !important;
+    height: 3in !important;
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  .note {
+    width: 4in !important;
+    height: 3in !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+  .header-bands { display: block !important; }
+  @page { size: 4in 3in; margin: 0; }
+  *, *::before, *::after { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── Toolbar ────────────────────────────────── -->
+<div class="toolbar">
+  <h2>Beyond Wound Care — Custom Notepad (4″ wide × 3″ tall)</h2>
+  <button class="btn accent" onclick="exportNote(this, false)">⬇ Export PNG (300 DPI)</button>
+  <button class="btn accent" onclick="exportNote(this, true)">⬇ Export Hi-Res (600 DPI)</button>
+  <button class="btn ghost" onclick="window.print()">🖨 Print</button>
+</div>
+
+<!-- ── Bleed guide ────────────────────────────── -->
+<div class="bleed-wrap">
+  <span class="bleed-label">⬡ Red hatching = bleed zone (⅛″) — keep text inside the white card</span>
+
+  <!-- ═══════════ STICKY NOTE ════════════════ -->
+  <div class="note" id="note">
+
+    <!-- Header -->
+    <div class="note-header">
+      <!-- SVG bands: renders correctly in both browser and html2canvas export -->
+      <svg class="header-bands" viewBox="0 0 400 76" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- dark left diagonal -->
+        <polygon points="0,0 184,0 104,76 0,76" fill="rgba(0,0,0,0.2)"/>
+        <!-- light right corner triangle -->
+        <polygon points="320,0 400,0 400,46" fill="#2db5e8" opacity="0.85"/>
+        <!-- gold accent bar at bottom -->
+        <rect x="0" y="72" width="220" height="4" fill="#f4a01c"/>
+        <rect x="220" y="72" width="180" height="4" fill="url(#fadeBar)"/>
+        <defs>
+          <linearGradient id="fadeBar" x1="0" x2="1" y1="0" y2="0">
+            <stop offset="0%" stop-color="#f4a01c"/>
+            <stop offset="100%" stop-color="#f4a01c" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+      </svg>
+      <div class="note-header-content">
+        <img class="header-logo" src="assets/img/beyond.png" alt="Beyond Wound Care">
+        <div class="header-divider"></div>
+        <div class="header-brand">
+          <span class="b1">Beyond Wound Care</span>
+          <span class="b2">Internal Medicine &amp; Wound Care</span>
+          <span class="b3">📞 847.873.8693 &nbsp;·&nbsp; 📠 847.873.8486</span>
+          <span class="b3" style="margin-top:3px;">✉ support@beyondwoundcare.com</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div class="note-body">
+      <p class="note-from">From the desk of:</p>
+    </div>
+
+    <!-- Footer contact strip -->
+    <div class="note-footer">
+      <div class="footer-row">
+        <div class="fi">
+          <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 110-5 2.5 2.5 0 010 5z"/></svg>
+          <span>1340 Remington Rd, Ste P, Schaumburg, IL 60173</span>
+        </div>
+      </div>
+      <div class="footer-row">
+        <div class="fi">
+          <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm4.24 16L12 15.45 7.77 18l1.12-4.81-3.73-3.23 4.92-.42L12 5l1.92 4.53 4.92.42-3.73 3.23L16.23 18z"/></svg>
+          <span>www.beyondwoundcare.com</span>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /note -->
+</div><!-- /bleed-wrap -->
+
+<!-- ── Upload instructions ────────────────────── -->
+<div class="info-box">
+  <h3>VistaPrint Upload Guide — Custom Notepad / Sticky Notes</h3>
+  <ul>
+    <li>Click <span class="hl">⬇ Export Hi-Res (600 DPI)</span> to download the PNG at full print quality.</li>
+    <li>On VistaPrint, search for <span class="hl">"Custom Notepads"</span> → choose <strong>3×4 inch</strong>, 50 or 100 sheets.</li>
+    <li>Upload the downloaded PNG as your design. Select <span class="hl">Glossy coated finish</span> for vibrant color.</li>
+    <li>The red hatched border on-screen is the bleed guide — it will NOT appear in the export or on print.</li>
+    <li>Proof carefully: keep the company name fully within the safe (non-hatched) area.</li>
+  </ul>
+</div>
+
+<!-- ── Export script ──────────────────────────── -->
+<script>
+async function exportNote(btn, hiRes = false) {
+  const el = document.getElementById('note');
+  const scale = hiRes ? 6 : 3;
+  const suffix = hiRes ? '600dpi' : '300dpi';
+
+  const orig = btn.textContent;
+  btn.textContent = '\u23f3 Rendering\u2026';
+  btn.disabled = true;
+
+  try {
+    const cvs = await html2canvas(el, {
+      scale:           scale,
+      useCORS:         true,
+      allowTaint:      true,
+      backgroundColor: '#ffffff',
+      logging:         false,
+      imageTimeout:    0,
+      removeContainer: true,
+      onclone: (clonedDoc) => {
+        const cloned = clonedDoc.getElementById('note');
+        if (cloned) {
+          cloned.style.borderRadius = '0';
+          cloned.style.boxShadow = 'none';
+        }
+      }
+    });
+
+    const link = document.createElement('a');
+    link.download = `beyond-notepad-4x3-${suffix}.png`;
+    link.href = cvs.toDataURL('image/png', 1.0);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  } catch (err) {
+    alert('Export failed: ' + err.message);
+  } finally {
+    btn.textContent = orig;
+    btn.disabled = false;
+  }
+}
+</script>
+</body>
+</html>
