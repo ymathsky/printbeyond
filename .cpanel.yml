@@ -2,4 +2,5 @@
 deployment:
   tasks:
     - export DEPLOYPATH=/home3/beyondwo/public_html/print
+    - /bin/mkdir -p $DEPLOYPATH
     - /bin/cp -r . $DEPLOYPATH
