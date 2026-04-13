@@ -442,7 +442,7 @@ body {
     <input type="text" id="input-name" placeholder="e.g. Dr. Sarah Johnson" oninput="updateCard()">
   </div>
   <div class="field">
-    <label>Personal / Direct Phone</label>
+    <label>Personal / Contact Phone</label>
     <input type="text" id="input-phone" placeholder="e.g. 847.555.0123" oninput="updateCard()">
   </div>
 </div>
@@ -456,7 +456,7 @@ function updateCard() {
   const phoneEl = document.getElementById('display-phone');
   nameEl.textContent = name;
   nameEl.style.display = name ? 'block' : 'none';
-  phoneEl.textContent = phone ? 'Direct: ' + phone : '';
+  phoneEl.textContent = phone ? 'Contact: ' + phone : '';
   phoneEl.style.display = phone ? 'block' : 'none';
 }
 updateCard(); // init hidden
