@@ -1,5 +1,5 @@
 ---
 deployment:
   tasks:
-    - export DEPLOYPATH=/home3/beyondwo/marketing.beyondwoundcare.com
+    - export DEPLOYPATH=/home3/beyondwo/public_html/print
     - /bin/cp -r . $DEPLOYPATH
