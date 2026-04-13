@@ -1,6 +1,6 @@
 ---
 deployment:
   tasks:
-    - export DEPLOYPATH=/home3/beyondwo/public_html/print
+    - export DEPLOYPATH=/home/md-offic1/print.md-officesupport.com
     - /bin/mkdir -p $DEPLOYPATH
     - /bin/cp -r . $DEPLOYPATH
